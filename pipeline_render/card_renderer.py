@@ -42,20 +42,20 @@ class CardRenderer:
 
     def __init__(self, config=None):
         self.config = config
-        # 폰트 로드 (subtitle_image_renderer와 동일 우선순위)
-        self.font_path = None
-        for fp in [
-            Path("D:/AntiGravity/Assets/fonts/BMDOHYEON_ttf.ttf"),
-            Path("D:/AntiGravity/Assets/fonts/JalnanGothicTTF.ttf"),
-            Path("D:/AntiGravity/Assets/fonts/GmarketSansTTFBold.ttf"),
-            Path("C:/Windows/Fonts/malgunbd.ttf"),
-        ]:
-            if fp.exists():
-                self.font_path = str(fp)
-                break
+        # 폰트 로드 (PathResolver SSOT)
+        try:
+            from path_resolver import get_paths
+            self.font_path = get_paths().system_font_path
+        except (ImportError, Exception):
+            self.font_path = None
 
     def _get_font(self, size: int) -> ImageFont.FreeTypeFont:
-        """폰트 로드 (graceful fallback)"""
+        """폰트 로드 (PathResolver SSOT)"""
+        try:
+            from path_resolver import resolve_korean_font
+            return resolve_korean_font(size)
+        except (ImportError, Exception):
+            pass
         if self.font_path:
             try:
                 return ImageFont.truetype(self.font_path, size)

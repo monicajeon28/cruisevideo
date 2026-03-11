@@ -179,14 +179,14 @@ class VisualEffectsConfig:
     # WO v12.0 Phase 4: 장면 전환 스타일
     transition_style: str = "auto"  # "auto" / "crossfade" / "hard_cut"
     fade_black_duration: float = 0.15  # Fade-to-black 삽입 시간 (Block 전환 시)
-    # WO v12.0 Phase 3: Pop 스타일
-    pop_style: str = "badge"  # "badge" / "classic"
 
 
 @dataclass
 class MarketingConfig:
     """CTA/Re-hook/Pop 마케팅 설정"""
     enable_cta: bool = True
+    # WO v12.0 Phase 3: Pop 스타일 (마케팅 영역이므로 여기에 배치)
+    pop_style: str = "badge"  # "badge" / "classic"
     cta_duration: float = 3.0
     cta_text: str = "프로필에서 확인하세요"
     cta_font_size: int = 64

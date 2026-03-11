@@ -394,21 +394,11 @@ class VideoComposer:
         img = Image.new("RGBA", (1080, 1920), (0, 0, 0, 0))
         draw = ImageDraw.Draw(img)
 
-        # 폰트 로드 (자막 렌더러와 동일 우선순위)
-        font = None
-        for fp in [
-            Path("D:/AntiGravity/Assets/fonts/BMDOHYEON_ttf.ttf"),
-            Path("D:/AntiGravity/Assets/fonts/JalnanGothicTTF.ttf"),
-            Path("D:/AntiGravity/Assets/fonts/GmarketSansTTFBold.ttf"),
-            Path("C:/Windows/Fonts/malgunbd.ttf"),
-        ]:
-            if fp.exists():
-                try:
-                    font = ImageFont.truetype(str(fp), self.POP_BADGE_FONT_SIZE)
-                    break
-                except (OSError, ValueError):
-                    continue
-        if font is None:
+        # 폰트 로드 (PathResolver SSOT)
+        try:
+            from path_resolver import resolve_korean_font
+            font = resolve_korean_font(self.POP_BADGE_FONT_SIZE)
+        except (ImportError, Exception):
             font = ImageFont.load_default()
 
         # 텍스트 크기 측정

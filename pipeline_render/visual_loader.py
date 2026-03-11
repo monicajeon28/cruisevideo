@@ -221,8 +221,8 @@ class VisualLoader:
                 self._resources.track(clip)
                 logger.info(f"  Ken Burns 적용: {kb_type}")
 
-        # WO v12.0 Phase 6: 감정 기반 색보정 오버레이
-        if getattr(self.config, 'emotion_color_grade_enabled', True) and clip is not None:
+        # WO v12.0 Phase 6: 감정 기반 색보정 오버레이 (config 체크는 메서드 내부에서 처리)
+        if clip is not None:
             segment_emotion = seg.get('emotion', 'neutral')
             clip = self._effects.apply_emotion_color_grade(clip, segment_emotion)
 

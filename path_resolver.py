@@ -248,8 +248,11 @@ class PathResolver:
             if p.exists():
                 return str(p)
 
-        # 2. assets/fonts/
+        # 2. assets/fonts/ (디자인 폰트 우선 → 시스템 폰트)
         fonts_candidates = [
+            self.fonts_dir / "BMDOHYEON_ttf.ttf",
+            self.fonts_dir / "JalnanGothicTTF.ttf",
+            self.fonts_dir / "GmarketSansTTFBold.ttf",
             self.fonts_dir / "malgunbd.ttf",
             self.fonts_dir / "NanumGothicBold.ttf",
         ]
@@ -308,3 +311,20 @@ class PathResolver:
 def get_paths() -> PathResolver:
     """PathResolver 싱글턴 인스턴스 반환"""
     return PathResolver()
+
+
+def resolve_korean_font(size: int = 48):
+    """한글 디자인 폰트 로드 유틸리티 (SSOT)
+
+    subtitle_image_renderer, video_composer, card_renderer 공통 사용.
+    PathResolver의 system_font_path(디자인 폰트 포함)를 사용.
+
+    Returns:
+        PIL ImageFont 객체
+    """
+    from PIL import ImageFont
+    try:
+        font_path = get_paths().system_font_path
+        return ImageFont.truetype(font_path, size)
+    except (OSError, ValueError, Exception):
+        return ImageFont.load_default()

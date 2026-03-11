@@ -60,27 +60,11 @@ class SubtitleImageRenderer:
         self.width = 1080
         self.height = 1920
 
-        # Font configuration (Assets/fonts 우선 → PathResolver → 시스템 폰트)
-        self.font_path = None
-        # 1순위: Assets 폰트 디렉토리
-        assets_font_candidates = [
-            Path("D:/AntiGravity/Assets/fonts/BMDOHYEON_ttf.ttf"),
-            Path("D:/AntiGravity/Assets/fonts/JalnanGothicTTF.ttf"),
-            Path("D:/AntiGravity/Assets/fonts/GmarketSansTTFBold.ttf"),
-        ]
-        for fp in assets_font_candidates:
-            if fp.exists():
-                self.font_path = str(fp)
-                break
-        # 2순위: PathResolver
-        if not self.font_path:
-            try:
-                from path_resolver import get_paths
-                self.font_path = get_paths().system_font_path
-            except (ImportError, Exception):
-                pass
-        # 3순위: 시스템 폰트
-        if not self.font_path:
+        # Font configuration (PathResolver SSOT — 디자인 폰트 우선)
+        try:
+            from path_resolver import get_paths
+            self.font_path = get_paths().system_font_path
+        except (ImportError, Exception):
             self.font_path = "C:/Windows/Fonts/malgunbd.ttf"
 
         # [FIX P0-3] config 참조 (하드코딩 제거, SSOT 확립)
