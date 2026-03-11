@@ -157,7 +157,7 @@ class VisualEffectsConfig:
     enable_ken_burns: bool = True
     ken_burns_zoom_ratio: float = 0.048
     ken_burns_random_variance: float = 0.00
-    ken_burns_emotion_weight_enabled: bool = False
+    ken_burns_emotion_weight_enabled: bool = True
     ken_burns_for_images_only: bool = True
     enable_color_correction: bool = True
     color_correction_preset: str = "natural"
@@ -174,6 +174,13 @@ class VisualEffectsConfig:
     fingerprint_saturation_variance: float = 0.08  # ±8%
     fingerprint_contrast_variance: float = 0.05    # ±5%
     enable_fingerprint_variance: bool = True
+    # WO v12.0 Phase 6: 감정 기반 색보정 오버레이
+    emotion_color_grade_enabled: bool = True
+    # WO v12.0 Phase 4: 장면 전환 스타일
+    transition_style: str = "auto"  # "auto" / "crossfade" / "hard_cut"
+    fade_black_duration: float = 0.15  # Fade-to-black 삽입 시간 (Block 전환 시)
+    # WO v12.0 Phase 3: Pop 스타일
+    pop_style: str = "badge"  # "badge" / "classic"
 
 
 @dataclass

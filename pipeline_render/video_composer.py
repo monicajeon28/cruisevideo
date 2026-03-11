@@ -19,7 +19,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFont
 from moviepy import (
     ImageClip, TextClip, ColorClip, CompositeVideoClip,
     AudioFileClip,
@@ -53,6 +53,19 @@ class VideoComposer:
     POP_PULSE_PERIOD = 0.5        # 펄스 주기
     POP_FADE_OUT_DURATION = 0.2   # 퇴장 Fade Out 시간
 
+    # WO v12.0 Phase 3: 자막/Pop 타이밍 상수
+    SUBTITLE_FADE_IN = 0.2
+    SUBTITLE_FADE_OUT = 0.15
+    POP_TEXT_IMAGE_GAP = 0.2      # Pop 텍스트 종료 후 이미지 시작까지 갭
+    POP_BADGE_BG_ALPHA = 160      # Pop 배지 배경 투명도
+    POP_BADGE_CORNER_RADIUS = 25  # Pop 배지 모서리 반경
+    POP_BADGE_FONT_SIZE = 48      # Pop 배지 폰트 크기
+    POP_BADGE_PADDING_H = 40      # Pop 배지 좌우 패딩
+    POP_BADGE_PADDING_V = 18      # Pop 배지 상하 패딩
+    POP_BADGE_Y = 500             # Pop 배지 Y 위치 (상단 1/3)
+    POP_BADGE_SCALE_START = 0.8   # Scale-In 시작 크기
+    POP_BADGE_SCALE_END = 1.0     # Scale-In 끝 크기
+
     # Pop 하이라이트 패턴 (숫자 + 감정 키워드)
     HIGHLIGHT_PATTERNS = [
         r'(\d+[만백천억조]?원)',
@@ -77,7 +90,7 @@ class VideoComposer:
         """비주얼 + 자막 + Pop + CTA + 로고 합성"""
 
         # 1. 비주얼 타임라인
-        timed_visuals = self._create_timeline(visuals, subtitles)
+        timed_visuals = self._create_timeline(visuals, subtitles, script)
 
         # 2. 자막 생성
         font_path = self._get_font_path()
@@ -138,8 +151,8 @@ class VideoComposer:
 
         return max(get_clip_end(v) for v in timed_visuals)
 
-    def _create_timeline(self, visuals: List, subtitles: List[Dict]) -> List:
-        """비주얼 타임라인 생성"""
+    def _create_timeline(self, visuals: List, subtitles: List[Dict], script: dict = None) -> List:
+        """비주얼 타임라인 생성 (WO v12.0 Phase 4: 감정 기반 전환)"""
         prepared_visuals = []
 
         for idx, visual in enumerate(visuals):
@@ -162,14 +175,80 @@ class VideoComposer:
 
             prepared_visuals.append(visual)
 
-        # 크로스페이드 처리
+        # 세그먼트 감정/Block 정보 추출
+        segments = (script or {}).get('segments', [])
+
+        def _get_segment_block(idx):
+            """세그먼트 인덱스에서 Block 번호 추정"""
+            if idx < len(segments):
+                seg = segments[idx]
+                seg_type = seg.get('segment_type', '')
+                # 간단한 Block 매핑: hook→0, body전반→1, body후반→2, cta→3
+                if seg.get('section') == 'hook':
+                    return 0
+                if seg.get('section') == 'cta':
+                    return 3
+                return 1 if idx < len(segments) // 2 else 2
+            return -1
+
+        def _get_emotion(idx):
+            if idx < len(segments):
+                return segments[idx].get('emotion', 'neutral')
+            return 'neutral'
+
+        # 크로스페이드 처리 (auto 모드에서는 감정 기반 전환 사용)
+        transition_style = getattr(self.config, 'transition_style', 'auto')
+
+        if transition_style == 'auto' and len(prepared_visuals) > 1 and segments:
+            # 감정 기반 전환
+            timed = []
+            current_time = 0.0
+
+            for i, visual in enumerate(prepared_visuals):
+                v_dur = visual.duration if visual.duration else 5.0
+
+                # Block 변경 감지
+                is_block_change = (i > 0 and _get_segment_block(i) != _get_segment_block(i - 1))
+                emotion = _get_emotion(i)
+
+                # 전환 파라미터
+                params = self._effects.select_transition_params(emotion, is_block_change)
+
+                # Fade-to-black 삽입 (Block 전환 시)
+                if params["fade_black"] and i > 0:
+                    black_clip = self._effects.create_fade_black_clip()
+                    black_clip = black_clip.with_start(current_time)
+                    self._resources.track(black_clip)
+                    timed.append(black_clip)
+                    current_time += black_clip.duration
+                    logger.info(f"  Fade-to-black 삽입: {current_time:.2f}초 (Block 전환)")
+
+                # 크로스페이드 오버랩: 먼저 시간 당기고 나서 배치
+                xfade = params["crossfade"]
+                if i > 0 and xfade > 0:
+                    current_time -= xfade  # 오버랩만큼 시간 당김
+
+                timed_visual = visual.with_start(current_time)
+                self._resources.track(timed_visual)
+
+                if i > 0 and xfade > 0:
+                    timed_visual = timed_visual.with_effects([vfx.CrossFadeIn(xfade)])
+                    self._resources.track(timed_visual)
+
+                timed.append(timed_visual)
+                current_time += v_dur
+
+            logger.info(f"  감정 기반 전환 적용: {len(prepared_visuals)}개 클립, style={transition_style}")
+            return timed
+
+        # 기존 크로스페이드 처리
         if self.config.enable_crossfade and len(prepared_visuals) > 1:
             crossfade_composite = self._effects.apply_crossfade(prepared_visuals)
             if crossfade_composite:
-                logger.info(f"  크로스페이드 모드: {len(prepared_visuals)}개 클립 합성 (자막 TTS 동기화 유지)")
+                logger.info(f"  크로스페이드 모드: {len(prepared_visuals)}개 클립 합성")
                 return [crossfade_composite]
 
-        # 개별 타이밍
+        # 개별 타이밍 (hard_cut)
         timed = []
         current_time = 0.0
         for visual in prepared_visuals:
@@ -211,7 +290,7 @@ class VideoComposer:
                 self._resources.track(txt_clip_start)
                 txt_clip_pos = txt_clip_start.with_position(('center', self.config.subtitle_y_position))
                 self._resources.track(txt_clip_pos)
-                txt_clip = txt_clip_pos.with_effects([vfx.FadeIn(0.2), vfx.FadeOut(0.15)])
+                txt_clip = txt_clip_pos.with_effects([vfx.FadeIn(self.SUBTITLE_FADE_IN), vfx.FadeOut(self.SUBTITLE_FADE_OUT)])
                 self._resources.track(txt_clip)
 
                 subtitle_clips.append(txt_clip)
@@ -310,38 +389,113 @@ class VideoComposer:
         else:
             return seg.get('subtitle', '')[:20]
 
+    def _render_pop_badge(self, text: str) -> np.ndarray:
+        """Pop 배지 PIL 렌더링 — 반투명 pill 배경 + 흰색 텍스트 (WO v12.0 Phase 3)"""
+        img = Image.new("RGBA", (1080, 1920), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+
+        # 폰트 로드 (자막 렌더러와 동일 우선순위)
+        font = None
+        for fp in [
+            Path("D:/AntiGravity/Assets/fonts/BMDOHYEON_ttf.ttf"),
+            Path("D:/AntiGravity/Assets/fonts/JalnanGothicTTF.ttf"),
+            Path("D:/AntiGravity/Assets/fonts/GmarketSansTTFBold.ttf"),
+            Path("C:/Windows/Fonts/malgunbd.ttf"),
+        ]:
+            if fp.exists():
+                try:
+                    font = ImageFont.truetype(str(fp), self.POP_BADGE_FONT_SIZE)
+                    break
+                except (OSError, ValueError):
+                    continue
+        if font is None:
+            font = ImageFont.load_default()
+
+        # 텍스트 크기 측정
+        bbox = draw.textbbox((0, 0), text, font=font)
+        tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
+
+        # Pill 배경
+        cx, cy = 540, self.POP_BADGE_Y
+        pad_h, pad_v = self.POP_BADGE_PADDING_H, self.POP_BADGE_PADDING_V
+        pill_rect = [
+            cx - tw // 2 - pad_h, cy - th // 2 - pad_v,
+            cx + tw // 2 + pad_h, cy + th // 2 + pad_v,
+        ]
+        draw.rounded_rectangle(
+            pill_rect, radius=self.POP_BADGE_CORNER_RADIUS,
+            fill=(0, 0, 0, self.POP_BADGE_BG_ALPHA)
+        )
+
+        # 흰색 텍스트 (스트로크 없음 — 깔끔한 룩)
+        draw.text((cx, cy), text, font=font, fill=(255, 255, 255, 255), anchor="mm")
+
+        return np.array(img)
+
     def _create_single_pop(self, pop_clips, pop_text, pop_time, segment_text, font_path):
-        """단일 Pop 메시지 + 이미지 생성"""
+        """단일 Pop 메시지 + 이미지 생성 (WO v12.0 Phase 3: badge 스타일)"""
         try:
-            pop_text_clip = TextClip(
-                text=pop_text,
-                font_size=self.config.pop_font_size,
-                color='yellow',
-                font=str(font_path),
-                stroke_color='red',
-                stroke_width=self.config.pop_stroke_width,
-                method='caption',
-                size=(self.POP_TEXT_WIDTH, None)
-            )
-            self._resources.track(pop_text_clip)
+            pop_style = getattr(self.config, 'pop_style', 'badge')
+            pop_dur = self.config.pop_duration  # 기본 1.5초
 
-            pop_dur = pop_text_clip.with_duration(self.config.pop_duration)
-            self._resources.track(pop_dur)
-            pop_start = pop_dur.with_start(pop_time)
-            self._resources.track(pop_start)
+            if pop_style == 'badge':
+                # PIL 기반 배지 렌더링
+                badge_array = self._render_pop_badge(pop_text)
+                badge_clip = ImageClip(badge_array, is_mask=False, transparent=True)
+                self._resources.track(badge_clip)
 
-            pop_y = self.POP_Y_CYCLE[len(pop_clips) % len(self.POP_Y_CYCLE)]
-            pop_pos = pop_start.with_position(('center', pop_y))
-            self._resources.track(pop_pos)
-            pop_clip = pop_pos.with_effects([vfx.FadeIn(self.config.fade_in_duration), vfx.FadeOut(self.config.fade_out_duration)])
-            self._resources.track(pop_clip)
+                badge_clip = badge_clip.with_duration(pop_dur)
+                self._resources.track(badge_clip)
+                badge_clip = badge_clip.with_start(pop_time)
+                self._resources.track(badge_clip)
 
-            pop_clips.append(pop_clip)
+                # Scale-In 애니메이션 (0.8x → 1.0x, 0.3초)
+                scale_dur = self.POP_SCALE_IN_DURATION
+                s_start, s_end = self.POP_BADGE_SCALE_START, self.POP_BADGE_SCALE_END
 
-            # Pop 이미지 매칭 — 텍스트 후 0.8초 지연 시작 (겹침 방지)
-            self._add_pop_image(pop_clips, segment_text, pop_time + 0.8)
+                def scale_func(t):
+                    if t < scale_dur:
+                        return s_start + (s_end - s_start) * (t / scale_dur)
+                    return s_end
 
-            logger.info(f"  Pop 메시지+이미지 추가: '{pop_text}' ({pop_time:.2f}초)")
+                badge_clip = badge_clip.resized(scale_func)
+                self._resources.track(badge_clip)
+                badge_clip = badge_clip.with_position('center')
+                self._resources.track(badge_clip)
+                badge_clip = badge_clip.with_effects([vfx.FadeOut(self.POP_FADE_OUT_DURATION)])
+                self._resources.track(badge_clip)
+
+                pop_clips.append(badge_clip)
+            else:
+                # Classic 스타일 (기존 yellow/red TextClip)
+                pop_text_clip = TextClip(
+                    text=pop_text,
+                    font_size=self.config.pop_font_size,
+                    color='yellow',
+                    font=str(font_path),
+                    stroke_color='red',
+                    stroke_width=self.config.pop_stroke_width,
+                    method='caption',
+                    size=(self.POP_TEXT_WIDTH, None)
+                )
+                self._resources.track(pop_text_clip)
+                pop_clip = pop_text_clip.with_duration(pop_dur).with_start(pop_time)
+                self._resources.track(pop_clip)
+                pop_y = self.POP_Y_CYCLE[len(pop_clips) % len(self.POP_Y_CYCLE)]
+                pop_clip = pop_clip.with_position(('center', pop_y))
+                self._resources.track(pop_clip)
+                pop_clip = pop_clip.with_effects([
+                    vfx.FadeIn(self.config.fade_in_duration),
+                    vfx.FadeOut(self.config.fade_out_duration)
+                ])
+                self._resources.track(pop_clip)
+                pop_clips.append(pop_clip)
+
+            # Pop 이미지 — 텍스트 종료 후 GAP 간격으로 시작 (겹침 완전 방지)
+            image_start = pop_time + pop_dur + self.POP_TEXT_IMAGE_GAP
+            self._add_pop_image(pop_clips, segment_text, image_start)
+
+            logger.info(f"  Pop [{pop_style}] 추가: '{pop_text}' ({pop_time:.2f}초, img@{image_start:.2f}초)")
         except (ValueError, RuntimeError, OSError) as e:
             logger.warning(f"  Pop 메시지 생성 실패: {e}")
 

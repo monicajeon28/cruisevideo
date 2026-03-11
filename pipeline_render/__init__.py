@@ -3,5 +3,6 @@
 from pipeline_render.audio_mixer import AudioMixer
 from pipeline_render.visual_loader import VisualLoader
 from pipeline_render.video_composer import VideoComposer
+from pipeline_render.card_renderer import CardRenderer
 
-__all__ = ["AudioMixer", "VisualLoader", "VideoComposer"]
+__all__ = ["AudioMixer", "VisualLoader", "VideoComposer", "CardRenderer"]

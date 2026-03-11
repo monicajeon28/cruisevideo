@@ -221,6 +221,11 @@ class VisualLoader:
                 self._resources.track(clip)
                 logger.info(f"  Ken Burns 적용: {kb_type}")
 
+        # WO v12.0 Phase 6: 감정 기반 색보정 오버레이
+        if getattr(self.config, 'emotion_color_grade_enabled', True) and clip is not None:
+            segment_emotion = seg.get('emotion', 'neutral')
+            clip = self._effects.apply_emotion_color_grade(clip, segment_emotion)
+
         # 최종 안전망
         if clip is None:
             logger.error(f"  [CRITICAL] 세그먼트 {i}: 모든 fallback 실패 - ColorClip 강제 생성")

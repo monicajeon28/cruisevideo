@@ -25,6 +25,15 @@ from moviepy import (
 
 logger = logging.getLogger(__name__)
 
+# WO v12.0 Phase 6: 세그먼트 감정 기반 색보정 오버레이 (5060 시청자 - 매우 은은한 톤)
+EMOTION_COLOR_MAP = {
+    "안심": (255, 200, 150, 15),   # 따뜻한 오렌지
+    "공감": (255, 220, 180, 12),   # 따뜻한 옐로우
+    "동경": (150, 200, 255, 15),   # 시원한 블루
+    "확신": (255, 255, 200, 10),   # 밝은 따뜻함
+    "neutral": (0, 0, 0, 0),       # 오버레이 없음
+}
+
 
 class VisualEffects:
     """시각 효과 처리기 (config + resources 의존성 주입)"""
@@ -305,6 +314,78 @@ class VisualEffects:
 
         logger.info(f"  크로스페이드 적용: {len(clips)}개 클립, overlap={overlap}초")
         return composite
+
+    def apply_emotion_color_grade(self, clip, emotion: str):
+        """감정 기반 색보정 오버레이 적용 (WO v12.0 Phase 6)
+
+        5060 시청자 대상 — alpha 10~15/255로 매우 은은하게 적용.
+        """
+        if not getattr(self.config, 'emotion_color_grade_enabled', True):
+            return clip
+
+        color = EMOTION_COLOR_MAP.get(emotion, EMOTION_COLOR_MAP["neutral"])
+        if color[3] == 0:
+            return clip
+
+        # None 가드: size 또는 duration 없으면 스킵
+        if not hasattr(clip, 'size') or clip.size is None or clip.duration is None:
+            return clip
+
+        try:
+            overlay = ColorClip(
+                size=clip.size, color=color[:3]
+            ).with_duration(clip.duration).with_opacity(color[3] / 255)
+            self._resources.track(overlay)
+
+            result = CompositeVideoClip([clip, overlay])
+            result = result.with_duration(clip.duration)
+            self._resources.track(result)
+
+            logger.debug(f"  감정 색보정 적용: emotion={emotion}, rgba={color}")
+            return result
+        except (ValueError, RuntimeError, AttributeError) as e:
+            logger.warning(f"  감정 색보정 적용 실패: {e}, 원본 반환")
+            return clip
+
+    def select_transition_params(self, emotion: str, is_block_change: bool = False) -> dict:
+        """감정 기반 전환 파라미터 반환 (WO v12.0 Phase 4)
+
+        Args:
+            emotion: 세그먼트 감정 ("안심", "공감", "동경", "확신", "neutral")
+            is_block_change: Block이 변경되었는지 여부
+
+        Returns:
+            dict: {"crossfade": float, "fade_black": bool}
+        """
+        style = getattr(self.config, 'transition_style', 'auto')
+
+        if style == 'hard_cut':
+            return {"crossfade": 0.0, "fade_black": False}
+        if style == 'crossfade':
+            return {"crossfade": self.config.crossfade_duration, "fade_black": False}
+
+        # auto 모드: 감정 기반
+        emotion_crossfade = {
+            "안심": 0.35,
+            "공감": 0.30,
+            "동경": 0.50,
+            "확신": 0.20,
+            "neutral": 0.35,
+        }
+        xfade = emotion_crossfade.get(emotion, 0.35)
+        use_black = is_block_change  # Block 전환 시만 fade-to-black
+
+        return {"crossfade": xfade, "fade_black": use_black}
+
+    def create_fade_black_clip(self, duration: float = None):
+        """Fade-to-black 삽입용 검정 클립 생성 (WO v12.0 Phase 4)"""
+        dur = duration or getattr(self.config, 'fade_black_duration', 0.15)
+        clip = ColorClip(
+            size=(self.config.width, self.config.height),
+            color=(0, 0, 0)
+        ).with_duration(dur)
+        self._resources.track(clip)
+        return clip
 
     def scale_to_fit(self, clip, target_width: int = 1080, target_height: int = 1920):
         """영상/이미지를 타겟 크기에 맞게 스케일 (crop 대신 검은 여백)"""
