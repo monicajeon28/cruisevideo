@@ -1,0 +1,27 @@
+# CruiseDot Video Pipeline - EXE 배포용 최소 의존성
+# Phase 3 최적화 완료 버전
+
+# === 핵심 (필수) ===
+moviepy>=2.0.0
+imageio>=2.31.1
+imageio-ffmpeg>=0.4.9
+Pillow>=10.4.0
+numpy>=1.24.3
+
+# === AI/API ===
+google-genai>=1.0.0
+
+# === 설정 파싱 ===
+PyYAML>=6.0
+
+# === 유틸리티 ===
+python-dotenv>=1.0.0
+tqdm>=4.66.1
+requests>=2.31.0
+
+# === TTS ===
+# edge-tts (필요시 추가)
+
+# === 개발 도구 (EXE 빌드에 불포함) ===
+# pytest>=7.4.3
+# ruff>=0.1.0

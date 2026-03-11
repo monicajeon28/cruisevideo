@@ -1,0 +1,327 @@
+# Cruise Config Master - 크루즈 마스터 설정
+# 20개 카테고리 + 12개 기항지 + 3종 Content Type
+
+# 기항지 목록 (지역별)
+ports:
+  일본:
+    - code: NAGASAKI
+      name: 나가사키
+      region: 일본
+    - code: FUKUOKA
+      name: 후쿠오카
+      region: 일본
+    - code: SHIMONOSEKI
+      name: 시모노세키
+      region: 일본
+    - code: OSAKA
+      name: 오사카
+      region: 일본
+    - code: KAGOSHIMA
+      name: 가고시마
+      region: 일본
+
+  동유럽:
+    - code: SANTORINI
+      name: 산토리니
+      region: 동유럽
+    - code: DUBROVNIK
+      name: 두브로브니크
+      region: 동유럽
+    - code: VENICE
+      name: 베니스
+      region: 동유럽
+    - code: BARCELONA
+      name: 바르셀로나
+      region: 동유럽
+    - code: NAPLES
+      name: 나폴리
+      region: 동유럽
+    - code: MARSEILLE
+      name: 마르세유
+      region: 동유럽
+
+  알래스카:
+    - code: JUNEAU
+      name: 주노
+      region: 알래스카
+    - code: KETCHIKAN
+      name: 케치칸
+      region: 알래스카
+    - code: SKAGWAY
+      name: 스캐그웨이
+      region: 알래스카
+
+  아시아:
+    - code: SHANGHAI
+      name: 상하이
+      region: 아시아
+    - code: KEELUNG
+      name: 지룽
+      region: 아시아
+      notes: 대만
+    - code: NHATRANG
+      name: 나트랑
+      region: 아시아
+
+# 선박 목록
+ships:
+  - code: EXPLORER_OF_THE_SEAS
+    name: 익스플로러 오브 더 시즈
+    company: 로얄 캐리비안 인터내셔널
+    region: 지중해
+    capacity: 3114
+
+  - code: VOYAGER_OF_THE_SEAS
+    name: 보이저 오브 더 시즈
+    company: 로얄 캐리비안 인터내셔널
+    region: 알래스카
+    capacity: 3114
+
+  - code: MSC_BELLISSIMA
+    name: MSC 벨리시마
+    company: MSC 크루즈
+    region: 아시아
+    capacity: 4500
+
+# 가격 티어 (T1/T2/T3)
+price_tiers:
+  T1_진입가:
+    name: 진입
+    range: [1000000, 1500000]
+    anchor_text: 만원부터
+    positioning: 도파민형
+    description: 알래스카 내측 기준, 가격 충격으로 관심 유도
+    content_type: PRICE_SHOCK
+
+  T2_주력가:
+    name: 주력
+    range: [1500000, 2500000]
+    anchor_text: 만원대
+    positioning: 교육형
+    description: 지중해 주력가, 기준 제시 후 가치 설득
+    content_type: VALUE_EDUCATION
+
+  T3_프리미엄:
+    name: 프리미엄
+    range: [2500000, 5000000]
+    anchor_text: 만원대
+    positioning: 신뢰형
+    description: 지중해 프리미엄, 가격 분해 절대 금지
+    content_type: TRUST_PREMIUM
+    rules:
+      - 가격 분해 금지
+      - 월 XX만원 표현 금지
+      - 경험 총가치 강조
+
+# 20개 카테고리 (P0-P3 우선순위)
+categories:
+  # P0: 핵심 카테고리 (30%, Weight 0.30)
+  - code: FEAR_RESOLUTION
+    name: 불안해소
+    priority: P0
+    weight: 0.06
+    content_types: [T1_진입가, T2_주력가, T3_프리미엄]
+    comparison_frame: 육지리스크→크루즈케어
+    port_dependent: true
+    sub_topics_count: 7
+
+  - code: PORT_INFO
+    name: 기항지정보
+    priority: P0
+    weight: 0.08
+    content_types: [T1_진입가, T2_주력가, T3_프리미엄]
+    comparison_frame: 육지이동→크루즈자는동안도착
+    port_dependent: true
+    sub_topics_count: 8
+
+  - code: SHIP_FACILITIES
+    name: 선내시설
+    priority: P0
+    weight: 0.06
+    content_types: [T1_진입가, T2_주력가, T3_프리미엄]
+    comparison_frame: 육지호텔→크루즈5만톤리조트
+    port_dependent: false
+    sub_topics_count: 10
+
+  - code: CRITERIA_EDUCATION
+    name: 여행기준교육
+    priority: P0
+    weight: 0.06
+    content_types: [T2_주력가, T3_프리미엄]
+    positioning: 기준제시형
+    notes: 고가 세일즈 핵심 - 전문가 포지셔닝
+    port_dependent: false
+    sub_topics_count: 6
+
+  - code: PREMIUM_EXPERIENCE
+    name: 프리미엄경험
+    priority: P0
+    weight: 0.04
+    content_types: [T3_프리미엄]
+    positioning: 경험총가치형
+    notes: T3 프리미엄 전용 - 가격 분해 금지
+    port_dependent: true
+    sub_topics_count: 5
+
+  # P1: 가치 강조 (25%, Weight 0.25)
+  - code: FOOD
+    name: 음식
+    priority: P1
+    weight: 0.08
+    content_types: [T1_진입가, T2_주력가, T3_프리미엄]
+    comparison_frame: 육지매끼외식비→크루즈포함
+    port_dependent: false
+    sub_topics_count: 12
+
+  - code: VALUE_PROOF
+    name: 가격가성비
+    priority: P1
+    weight: 0.06
+    content_types: [T1_진입가]
+    comparison_frame: 육지개별합산→크루즈포함가
+    notes: 저가 진입 전용 - 싸다 표현 절대 금지
+    port_dependent: false
+    sub_topics_count: 8
+
+  - code: TIPS
+    name: 꿀팁
+    priority: P1
+    weight: 0.05
+    content_types: [T1_진입가, T2_주력가, T3_프리미엄]
+    port_dependent: true
+    sub_topics_count: 10
+
+  - code: COMPARISON
+    name: 비교
+    priority: P1
+    weight: 0.04
+    content_types: [T2_주력가, T3_프리미엄]
+    comparison_frame: 육지여행→크루즈기준
+    notes: 여행사 패키지 비교 절대 금지
+    port_dependent: false
+    sub_topics_count: 6
+
+  - code: LUXURY
+    name: 럭셔리
+    priority: P1
+    weight: 0.02
+    content_types: [T3_프리미엄]
+    port_dependent: true
+    sub_topics_count: 5
+
+  # P2: 추가 지원 (25%, Weight 0.25)
+  - code: BUCKET_LIST
+    name: 버킷리스트
+    priority: P2
+    weight: 0.05
+    content_types: [T2_주력가, T3_프리미엄]
+    port_dependent: true
+    sub_topics_count: 8
+
+  - code: SERIES
+    name: 시리즈
+    priority: P2
+    weight: 0.05
+    content_types: [T1_진입가, T2_주력가, T3_프리미엄]
+    port_dependent: true
+    sub_topics_count: 6
+
+  - code: SENIOR
+    name: 시니어
+    priority: P2
+    weight: 0.05
+    content_types: [T2_주력가, T3_프리미엄]
+    comparison_frame: 육지체력리스크→크루즈케어
+    port_dependent: false
+    sub_topics_count: 7
+
+  - code: REVIEWS
+    name: 후기리뷰
+    priority: P2
+    weight: 0.05
+    content_types: [T1_진입가, T2_주력가, T3_프리미엄]
+    port_dependent: true
+    sub_topics_count: 6
+
+  - code: SAFETY
+    name: 의료안전
+    priority: P2
+    weight: 0.05
+    content_types: [T2_주력가, T3_프리미엄]
+    port_dependent: false
+    sub_topics_count: 5
+
+  # P3: Long-tail (20%, Weight 0.20)
+  - code: FAMILY
+    name: 가족여행
+    priority: P3
+    weight: 0.05
+    content_types: [T1_진입가, T2_주력가]
+    port_dependent: false
+    sub_topics_count: 6
+
+  - code: BOOKING
+    name: 예약가이드
+    priority: P3
+    weight: 0.05
+    content_types: [T1_진입가, T2_주력가, T3_프리미엄]
+    port_dependent: false
+    sub_topics_count: 5
+
+  - code: PERSUASION
+    name: 동반자설득
+    priority: P3
+    weight: 0.04
+    content_types: [T1_진입가, T2_주력가]
+    port_dependent: false
+    sub_topics_count: 5
+
+  - code: POST_BOOKING
+    name: 예약후안심
+    priority: P3
+    weight: 0.03
+    content_types: [T2_주력가, T3_프리미엄]
+    port_dependent: false
+    sub_topics_count: 4
+
+  - code: PACKING
+    name: 짐싸기준비
+    priority: P3
+    weight: 0.03
+    content_types: [T1_진입가, T2_주력가]
+    port_dependent: false
+    sub_topics_count: 4
+
+# 생성 전략
+generation_strategy:
+  daily_target: 100
+  s_grade_pass_rate: 0.90
+  retry_max: 3
+  premium_tier_ratio: 0.20
+  max_scripts_per_port: 4
+  max_scripts_per_category: 5
+  duplicate_prevention_days: 7
+  parallel_workers: 4
+
+# Content Type 별 Hook 타입
+content_type_hooks:
+  T1_진입가:
+    - PRICE_SHOCK
+    - FOMO_URGENCY
+    - COMPARISON_GAP
+
+  T2_주력가:
+    - VALUE_EDUCATION
+    - CRITERIA_STANDARD
+    - EXPERT_AUTHORITY
+
+  T3_프리미엄:
+    - TRUST_PREMIUM
+    - EXPERIENCE_TOTAL
+    - EMOTION_STORY
+
+# CTA 3단계 템플릿
+cta_templates:
+  urgency: "프로필 링크 확인하세요"
+  action: "카카오톡에서 크루즈닷 검색"
+  trust: "11년 경력 + 2억 보험 + 24시간 케어"

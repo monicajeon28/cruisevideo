@@ -1,0 +1,18 @@
+[wsl2]
+# WSL 메모리 제한 (8GB)
+memory=8GB
+
+# WSL CPU 코어 제한 (4코어)
+processors=4
+
+# WSL Swap 파일 크기 (4GB)
+swap=4GB
+
+# 네트워크 모드 (NAT 방식)
+networkingMode=NAT
+
+# localhost 포트 포워딩 활성화
+localhostForwarding=true
+
+# 부팅 시 자동 메모리 회수
+autoMemoryReclaim=gradual

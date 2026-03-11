@@ -1,0 +1,60 @@
+================================================================================
+템플릿 변수 자동 추출 및 검증 스크립트
+================================================================================
+
+[Step 1] v7_template 파일 스캔 중...
+✓ 발견된 템플릿 파일: 2개
+  - pasona_A_eastern_europe_fear_v7_template.json: 5개 변수
+  - pasona_B_msc_moving_hotel_v7_template.json: 8개 변수
+
+✓ 전체 고유 변수: 9개
+  ['cities', 'daily_rate', 'deadline_days', 'duration_display', 'limited_seats', 'monthly_payment', 'region_display', 'support_amount', 'total_price']
+
+[Step 2] cruise_config.yaml 규칙 로드 중...
+✓ template_substitution_rules에 정의된 변수: 15개
+  ['daily_rate', 'deadline', 'duration_display', 'insurance_amount', 'limited_seats', 'monthly_payment', 'port_count', 'region_display', 'show_price_breakdown', 'success_rate', 'support_amount', 'total_customers', 'total_price', 'urgency_phrase', 'years_experience']
+
+[Step 3] 변수 일치 여부 검증 중...
+
+✓ 매칭된 변수: 7개
+  ['daily_rate', 'duration_display', 'limited_seats', 'monthly_payment', 'region_display', 'support_amount', 'total_price']
+
+❌ 문제 발견: 템플릿에는 있지만 cruise_config.yaml에 없는 변수
+   개수: 2개
+   - cities
+     (사용 파일: pasona_A_eastern_europe_fear_v7_template.json)
+     (사용 파일: pasona_B_msc_moving_hotel_v7_template.json)
+   - deadline_days
+     (사용 파일: pasona_A_eastern_europe_fear_v7_template.json)
+
+⚠ 주의: cruise_config.yaml에는 있지만 템플릿에서 사용하지 않는 변수
+   개수: 8개
+   - deadline
+   - insurance_amount
+   - port_count
+   - show_price_breakdown
+   - success_rate
+   - total_customers
+   - urgency_phrase
+   - years_experience
+
+[Step 4] 중복 변수 패턴 분석 중...
+
+✓ cities 변수만 사용 중 (port_count 없음)
+
+================================================================================
+검증 결과 요약
+================================================================================
+템플릿 파일 수: 2개
+고유 변수 수: 9개
+cruise_config.yaml 규칙 수: 15개
+매칭 성공: 7개
+누락된 규칙: 2개 ❌
+미사용 규칙: 8개 ⚠
+
+⚠ Agent 4C 문제 3, 4번 확인:
+   - deadline_days 미정의 (문제 3번)
+
+================================================================================
+분석 완료
+================================================================================

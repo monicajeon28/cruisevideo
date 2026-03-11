@@ -1,0 +1,31 @@
+# Phase S2-1-6: Pre-commit hooks
+# 설치: pip install pre-commit && pre-commit install
+
+repos:
+  # 시크릿 검출 (API 키 커밋 방지)
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: '\.env\.example$|\.backup.*$'
+
+  # Python 코드 품질 (Ruff)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.6
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # 대용량 파일 차단 + 기본 검사
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+        args: ['--maxkb=5000']
+      - id: check-yaml
+      - id: check-json
+        args: ['--no-ensure-ascii']
+      - id: end-of-file-fixer
+      - id: trailing-whitespace

@@ -1,0 +1,252 @@
+{
+  "version": "1.0",
+  "last_updated": "2025-12-20",
+
+  "api_keys": {
+    "gemini": {
+      "key": "${GEMINI_API_KEY}",
+      "provider": "Google Gemini",
+      "free_limits": {
+        "rpm": 15,
+        "rpd": 1500
+      },
+      "description": "무료 플랜 - 텍스트 생성용"
+    },
+
+    "pexels": {
+      "key": "${PEXELS_API_KEY}",
+      "provider": "Pexels",
+      "free_limits": {
+        "rph": 200,
+        "rpm": 20000
+      },
+      "description": "영상 소스 - 무료 무제한",
+      "url": "https://www.pexels.com/api/"
+    },
+
+    "pixabay": {
+      "key": "${PIXABAY_API_KEY}",
+      "provider": "Pixabay",
+      "free_limits": {
+        "unlimited": true
+      },
+      "description": "이미지 + BGM + 영상 - 무료 무제한",
+      "url": "https://pixabay.com/api/docs/"
+    },
+
+    "freesound": {
+      "key": "${FREESOUND_API_KEY}",
+      "provider": "Freesound",
+      "free_limits": {
+        "rpm": 60
+      },
+      "description": "효과음 - 무료",
+      "url": "https://freesound.org/apiv2/apply/"
+    },
+
+    "uno": {
+      "key": "${UNO_API_KEY}",
+      "provider": "UNO",
+      "description": "UNO API 서비스"
+    },
+
+    "openai": {
+      "key": "${OPENAI_API_KEY}",
+      "provider": "OpenAI",
+      "description": "GPT-4o Mini - 유료 (저렴)",
+      "url": "https://platform.openai.com/api-keys"
+    },
+
+    "elevenlabs": {
+      "key": "${ELEVENLABS_API_KEY}",
+      "provider": "ElevenLabs",
+      "description": "AI 음성 생성",
+      "voices": {
+        "female_announcer_30s": {
+          "id": "iWLjl1zCuqXRkW6494ve",
+          "name": "30대 아나운서형 여성",
+          "gender": "female",
+          "age_range": "30s",
+          "style": "announcer"
+        },
+        "female_creative_30s": {
+          "id": "QPFsEL6IBxlT15xfiD6C",
+          "name": "30대 크리에이티브형 여성",
+          "gender": "female",
+          "age_range": "30s",
+          "style": "creative"
+        },
+        "male_calm_30s_beomjun": {
+          "id": "2l8KWWxnmNRrrIQ984DO",
+          "name": "30대 차분함 범준 남성",
+          "gender": "male",
+          "age_range": "30s",
+          "style": "calm",
+          "persona": "beomjun"
+        },
+        "female_middleage_40s": {
+          "id": "fAgkbajYljImBTPFR28u",
+          "name": "40대 중년 여성",
+          "gender": "female",
+          "age_range": "40s",
+          "style": "middle_age"
+        },
+        "male_mike_30s": {
+          "id": "mgugV8tLa3KQE4mfYTw5",
+          "name": "30대 마이크 남성",
+          "gender": "male",
+          "age_range": "30s",
+          "persona": "mike"
+        },
+        "male_taeoh_30s": {
+          "id": "CxErO97xpQgQXYmapDKX",
+          "name": "30대 남성 태오",
+          "gender": "male",
+          "age_range": "30s",
+          "persona": "taeoh"
+        },
+        "female_han_conversational_30s": {
+          "id": "8jHHF8rMqMlg8if2mOUe",
+          "name": "30대 여성 한 대화형",
+          "gender": "female",
+          "age_range": "30s",
+          "style": "conversational",
+          "persona": "han"
+        },
+        "male_senior_50s": {
+          "id": "SWu2lWaUX4JBPKyh7h1p",
+          "name": "50대 장뎀보 남성",
+          "gender": "male",
+          "age_range": "50s",
+          "style": "senior"
+        },
+        "male_kyle_30s": {
+          "id": "RU7aSi6lT4uQBXMLgDxK",
+          "name": "30대 남성 카일",
+          "gender": "male",
+          "age_range": "30s",
+          "persona": "kyle"
+        }
+      }
+    },
+
+    "stability": {
+      "key": "${STABILITY_API_KEY}",
+      "provider": "Stability AI",
+      "description": "AI 이미지 생성 - 유료 ($10/월)",
+      "url": "https://platform.stability.ai/",
+      "enabled": false,
+      "note": "선택 API - 업그레이드 시"
+    },
+
+    "claude": {
+      "key": "${CLAUDE_API_KEY}",
+      "provider": "Anthropic Claude",
+      "description": "대본 다양성 - 유료 (저렴)",
+      "url": "https://console.anthropic.com/",
+      "enabled": false,
+      "note": "선택 API - 업그레이드 시"
+    },
+
+    "unsplash": {
+      "key": "${UNSPLASH_API_KEY}",
+      "provider": "Unsplash",
+      "free_limits": {
+        "rph": 50
+      },
+      "description": "이미지 소스 - 무료",
+      "url": "https://unsplash.com/developers",
+      "enabled": false,
+      "note": "API 키 필요 - 발급 후 입력"
+    }
+  },
+
+  "local_resources": {
+    "assets_root": "D:\\AntiGravity\\Assets",
+
+    "footage": {
+      "path": "D:\\AntiGravity\\Assets\\Footage",
+      "description": "크루즈 영상 파일",
+      "file_types": [".mp4", ".mov", ".avi"],
+      "indexed": true
+    },
+
+    "images": {
+      "path": "D:\\AntiGravity\\Assets\\Image",
+      "description": "크루즈 이미지 파일",
+      "file_types": [".jpg", ".png", ".jpeg"],
+      "indexed": true
+    },
+
+    "music": {
+      "path": "D:\\AntiGravity\\Assets\\Music",
+      "description": "BGM 파일",
+      "file_types": [".mp3", ".wav", ".aac"],
+      "indexed": true
+    },
+
+    "music_backup": {
+      "path": "D:\\AntiGravity\\Assets\\Music_Backup",
+      "description": "BGM 파일 백업과 키워드 인포메이션",
+      "has_metadata": true
+    },
+
+    "transparent_files": {
+      "path": "D:\\AntiGravity\\Assets",
+      "description": "누끼 파일 (투명 배경 이미지)",
+      "file_types": [".png"]
+    },
+
+    "logos": {
+      "path": "D:\\AntiGravity\\Assets\\Image\\로고",
+      "description": "크루즈닷 로고",
+      "file_types": [".png", ".svg"]
+    }
+  },
+
+  "learning_directories": {
+    "input": {
+      "path": "D:\\AntiGravity\\INPUT",
+      "description": "학습 자동화 입력 데이터"
+    },
+
+    "learning": {
+      "path": "D:\\AntiGravity\\LEARNING",
+      "description": "학습 데이터 및 패턴"
+    },
+
+    "data_collection": {
+      "path": "D:\\AntiGravity\\DataCollection",
+      "description": "수집된 원본 데이터"
+    }
+  },
+
+  "output_directory": {
+    "path": "D:\\AntiGravity\\Output",
+    "description": "최종 결과물 저장 위치",
+    "subdirectories": {
+      "videos_shorts": "shorts",
+      "videos_long": "long",
+      "scripts": "scripts",
+      "thumbnails": "thumbnails",
+      "metadata": "metadata"
+    }
+  },
+
+  "usage_notes": {
+    "api_priority": [
+      "로컬 자원 우선 사용 (무료)",
+      "Pixabay, Pexels (무료 무제한)",
+      "Freesound (효과음)",
+      "Gemini (텍스트 생성, 무료 할당량)",
+      "OpenAI, ElevenLabs (유료, 품질 중요 시)"
+    ],
+
+    "resource_optimization": [
+      "D:\\AntiGravity\\Assets의 로컬 자원을 최대한 활용",
+      "API는 로컬에 없는 자원만 요청",
+      "Music_Backup의 키워드 정보로 BGM 자동 매칭",
+      "학습 데이터는 LEARNING 디렉토리에 누적"
+    ]
+  }
+}

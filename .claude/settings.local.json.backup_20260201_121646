@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /s /b)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(find:*)",
+      "Bash(cd:*)",
+      "Bash(tree:*)",
+      "Bash(cmd /c \"if not exist D:\\\\mabiz\\\\engines mkdir D:\\\\mabiz\\\\engines\")"
+    ]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": ".*",
+        "command": "bash .claude/hooks/user_prompt_submit.sh"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": ".*",
+        "command": "bash .claude/hooks/pre_tool_use.sh"
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Task.*",
+        "command": "bash .claude/hooks/post_tool_use.sh"
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": ".*",
+        "command": "bash .claude/hooks/subagent_stop.sh"
+      }
+    ]
+  }
+}

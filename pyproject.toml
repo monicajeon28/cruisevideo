@@ -1,0 +1,37 @@
+[project]
+name = "cruisedot-video-pipeline"
+version = "5.0.0"
+description = "YouTube Shorts 55sec video pipeline for CruiseDot"
+requires-python = ">=3.11"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+# F: pyflakes, E/W: pycodestyle, I: isort, N: naming, UP: pyupgrade
+# B: bugbear, C4: comprehensions, SIM: simplify, S: bandit security
+# BLE: blind except, T20: print statements, PL: pylint, PERF: performance
+select = ["F", "E", "W", "I", "N", "UP", "B", "C4", "SIM", "S", "BLE", "T20", "PL", "PERF"]
+ignore = [
+    "E501",     # line too long (handled by formatter)
+    "S101",     # assert usage (OK in tests)
+    "PLR0913",  # too many arguments (dataclass configs)
+    "PLR2004",  # magic value comparison (acceptable in pipeline)
+    "T201",     # print statements (pipeline uses print for progress)
+    "S603",     # subprocess without shell=True (intended)
+    "S607",     # partial path in subprocess (ffmpeg)
+    # BLE001 제거: S2-2에서 except Exception 39건 정리 완료
+]
+
+[tool.ruff.lint.per-file-ignores]
+"test_*.py" = ["S101", "T201"]
+"*_test.py" = ["S101", "T201"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+check_untyped_defs = true
+# Gradually enable stricter checks
+disallow_untyped_defs = false

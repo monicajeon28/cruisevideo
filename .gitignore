@@ -1,0 +1,51 @@
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# API Keys & Secrets - NEVER COMMIT
+.env
+.env.local
+.env.production
+config/credentials.json
+config/credentials*.json
+config/*.backup_*
+*.backup_*
+!config/credentials.json.template
+_secrets_backup/
+
+# Proprietary Engine Internals - NEVER COMMIT
+engines/sgrade_constants.py
+engines/constants/
+engines/script_quality_validator.py
+engines/comprehensive_script_generator.py
+engines/segment_enhancer.py
+engines/gemini_script_prompter.py
+engines/fallback_script_generator.py
+engines/viral_score_calculator.py
+engines/script_validation_orchestrator.py
+
+# Learning Data & Research (proprietary)
+Learning_Data/
+gemini_research/
+
+# Outputs & Temp
+outputs/
+*.mp4
+*.wav
+*.mp3
+nul
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+.DS_Store
+
+# Claude logs
+.claude/logs/
+.claude/projects/

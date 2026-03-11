@@ -1,0 +1,29 @@
+# CruiseDot Path Configuration
+# EXE 배포 시 이 파일을 수정하여 에셋/출력 경로를 변경하세요.
+#
+# 우선순위:
+#   1. 환경변수 (CRUISEDOT_ASSETS_ROOT, CRUISEDOT_OUTPUT_ROOT 등)
+#   2. 이 파일 (paths.yaml)
+#   3. EXE 디렉토리 기준 상대 경로 (PyInstaller 환경)
+#   4. 개발 환경 기본값 (D:/AntiGravity/*)
+#
+# 환경변수 목록:
+#   CRUISEDOT_PROJECT_ROOT  - 프로젝트 루트
+#   CRUISEDOT_ASSETS_ROOT   - 에셋 디렉토리 (Image, Footage, Music, SoundFX)
+#   CRUISEDOT_OUTPUT_ROOT   - 출력 디렉토리 (Final Videos, Logs)
+#   CRUISEDOT_TEMP_DIR      - 임시 파일 디렉토리
+
+# 에셋 루트 디렉토리 (이미지, 영상, BGM, SFX, 폰트 포함)
+assets_root: "D:/AntiGravity/Assets"
+
+# 출력 루트 디렉토리 (최종 영상, 로그 등)
+output_root: "D:/AntiGravity/Output"
+
+# 임시 파일 디렉토리 (렌더링 중간 파일)
+temp_dir: "D:/mabiz/temp"
+
+# FFmpeg 경로 (비워두면 tools/ 또는 PATH에서 자동 탐색)
+# ffmpeg_path: ""
+
+# 폰트 파일 경로 (비워두면 assets/fonts/ 또는 시스템 폰트 자동 탐색)
+# font_path: ""
