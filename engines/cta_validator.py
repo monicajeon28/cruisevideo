@@ -232,7 +232,7 @@ class CTAValidator:
         if tier == "T4":
             return """
 CTA Stage 1 - Urgency (3.0초):
-"인기 일정 마감 임박입니다. 지금 신청하시면 60만원 지원 받으실 수 있어요"
+"인기 일정 마감 임박입니다. 오늘 신청하시면 60만원 지원 받으실 수 있어요"
 
 CTA Stage 2 - Action (3.5초):
 "프로필에서 크루즈닷 확인하세요. 3만원 쿠폰과 상담 예약 가능합니다"
@@ -296,7 +296,7 @@ if __name__ == "__main__":
             {"text": "Hook", "section": "hook", "duration": 5.0},
             {"text": "Body", "section": "body", "duration": 35.0},
             {
-                "text": "인기 일정 마감 임박입니다. 지금 신청하시면 60만원 지원",
+                "text": "인기 일정 마감 임박입니다. 오늘 신청하시면 60만원 지원",
                 "section": "cta",
                 "segment_type": "cta_urgency",
                 "duration": 3.0

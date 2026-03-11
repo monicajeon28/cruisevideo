@@ -11,8 +11,8 @@ import random
 import logging
 from pathlib import Path
 from typing import List, Tuple, Optional
-from moviepy.editor import VideoFileClip, concatenate_videoclips
-from moviepy.video.fx.all import resize, mirror_x, colorx, speedx
+from moviepy import VideoFileClip, concatenate_videoclips
+from moviepy.video import fx as vfx
 
 logger = logging.getLogger(__name__)
 
@@ -83,21 +83,23 @@ class AntiAbuseVideoEditor:
             효과가 적용된 클립
         """
         try:
-            # 1. 밝기 조정 (±5%)
+            # 1. 밝기 조정 (±5%) — MoviePy 2.x API
             brightness_factor = random.uniform(0.95, 1.05)
-            clip = clip.fx(colorx, brightness_factor)
+            clip = clip.with_effects([vfx.MultiplyColor(brightness_factor)])
 
             # 2. 속도 조정 (0.95x ~ 1.05x)
             speed_factor = random.uniform(0.95, 1.05)
-            clip = clip.fx(speedx, speed_factor)
+            clip = clip.with_effects([vfx.MultiplySpeed(speed_factor)])
 
             # 3. 좌우 반전 (50% 확률)
+            mirrored = False
             if random.random() < 0.5:
-                clip = clip.fx(mirror_x)
+                clip = clip.with_effects([vfx.MirrorX()])
+                mirrored = True
 
             logger.debug(
                 f"Applied random effects: brightness={brightness_factor:.2f}, "
-                f"speed={speed_factor:.2f}, mirrored={clip.fx == mirror_x}"
+                f"speed={speed_factor:.2f}, mirrored={mirrored}"
             )
             return clip
 
