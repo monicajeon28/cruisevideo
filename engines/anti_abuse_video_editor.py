@@ -56,7 +56,7 @@ class AntiAbuseVideoEditor:
                     logger.warning(f"Video too short: {video_path} ({clip.duration}s)")
                     break
 
-                segment = clip.subclip(current_time, end_time)
+                segment = clip.subclipped(current_time, end_time)
                 segments.append(segment)
                 current_time = end_time
 
@@ -183,7 +183,7 @@ class AntiAbuseVideoEditor:
 
             # 목표 길이에 맞게 자르기
             if final_clip.duration > total_duration:
-                final_clip = final_clip.subclip(0, total_duration)
+                final_clip = final_clip.subclipped(0, total_duration)
 
             # 출력 (1080x1920 세로형 유지)
             final_clip.write_videofile(

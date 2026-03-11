@@ -155,7 +155,7 @@ class VisualEffects:
                 new_w = max(new_w, original_w)
                 new_h = max(new_h, original_h)
 
-                img_resized = img.resize((new_w, new_h), Image.LANCZOS)
+                img_resized = img.resize((new_w, new_h), Image.Resampling.LANCZOS)
                 crop_x = int((new_w - original_w) * x_offset)
                 crop_y = int((new_h - original_h) * y_offset)
                 crop_x = max(0, min(crop_x, new_w - original_w))
