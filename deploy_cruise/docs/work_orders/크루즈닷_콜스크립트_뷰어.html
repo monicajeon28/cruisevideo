@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>크루즈닷 골드멤버십 콜스크립트 뷰어 v19</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F8F9FA;
+  --card:#FFFFFF;
+  --primary:#2563EB;
+  --navy:#1E3A5F;
+  --agent-bg:#F0F4FF;
+  --hot-bg:#FFF7ED;
+  --hot-border:#C2410C;
+  --tag-price-bg:#FEF3C7;--tag-price-text:#92400E;
+  --tag-resist-bg:#FEE2E2;--tag-resist-text:#991B1B;
+  --tag-answer-bg:#D1FAE5;--tag-answer-text:#065F46;
+  --tag-neutral-bg:#EDE9FE;--tag-neutral-text:#5B21B6;
+  --shadow:0 1px 4px rgba(0,0,0,.08);
+  --shadow-md:0 2px 12px rgba(0,0,0,.12);
+  --radius:10px;
+  --sidebar-w:220px;
+}
+body{font-family:'Noto Sans KR',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:#1a1a2e;line-height:1.7;font-size:14px}
+a{color:var(--primary);text-decoration:none}
+/* ─── STICKY HEADER ─── */
+#top-header{position:sticky;top:0;z-index:200;background:#fff;border-bottom:2px solid #E2E8F0;padding:10px 20px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+#top-header .logo{font-weight:700;font-size:16px;color:var(--navy);white-space:nowrap}
+#top-header .logo span{color:var(--primary)}
+#search-wrap{flex:1;max-width:480px;position:relative}
+#search-input{width:100%;padding:8px 40px 8px 14px;border:1.5px solid #CBD5E1;border-radius:24px;font-size:13px;font-family:inherit;outline:none;transition:.2s}
+#search-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+#search-count{font-size:12px;color:#64748B;white-space:nowrap}
+#search-clear{position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;color:#94A3B8;font-size:16px;display:none}
+#autocomplete-box{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #E2E8F0;border-radius:8px;box-shadow:var(--shadow-md);z-index:300;display:none;max-height:420px;overflow-y:auto}
+#autocomplete-box li{padding:8px 14px;cursor:pointer;font-size:13px;list-style:none;transition:.15s}
+#autocomplete-box li:hover{background:#F0F4FF}
+.ac-section-title{padding:6px 14px 3px;font-size:10px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.06em;background:#F8FAFC;border-top:1px solid #F1F5F9}
+.ac-block-item{display:flex;flex-direction:column;gap:3px;padding:10px 14px;cursor:pointer;border-bottom:1px solid #F8FAFC;transition:.15s}
+.ac-block-item:hover{background:#EFF6FF}
+.ac-block-header{display:flex;align-items:center;gap:7px}
+.ac-phase-tag{font-size:10px;font-weight:700;padding:1px 7px;border-radius:8px;background:#DBEAFE;color:#1E40AF;white-space:nowrap}
+.ac-block-label{font-size:12.5px;font-weight:600;color:#1E293B}
+.ac-block-preview{font-size:11.5px;color:#64748B;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* 검색 결과 모달 */
+#search-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:8000;align-items:flex-start;justify-content:center;padding:60px 20px 20px}
+#search-modal.open{display:flex}
+#search-modal-box{background:#fff;border-radius:14px;width:100%;max-width:640px;max-height:80vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.25)}
+#search-modal-header{position:sticky;top:0;background:#fff;padding:16px 20px 12px;border-bottom:1px solid #E2E8F0;display:flex;align-items:center;gap:10px;z-index:1}
+#search-modal-phase{font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;background:var(--navy);color:#fff}
+#search-modal-title{font-size:15px;font-weight:700;color:var(--navy);flex:1}
+#search-modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:#94A3B8;line-height:1;padding:0 4px}
+#search-modal-close:hover{color:#DC2626}
+#search-modal-body{padding:16px 20px 20px;font-size:13.5px;line-height:1.85;color:#1E293B;white-space:pre-wrap}
+#search-modal-note{margin-top:10px;font-size:12px;color:#64748B;font-style:italic;padding-top:10px;border-top:1px solid #F1F5F9}
+.header-btns{display:flex;gap:8px;margin-left:auto}
+.btn-sm{padding:6px 12px;border:1.5px solid #CBD5E1;background:#fff;border-radius:20px;font-size:12px;cursor:pointer;font-family:inherit;transition:.2s;color:#374151}
+.btn-sm:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+/* ─── PROGRESS BAR ─── */
+#progress-bar-wrap{background:#E2E8F0;height:4px}
+#progress-bar{height:4px;background:linear-gradient(90deg,var(--primary),#60A5FA);transition:.3s;width:0%}
+/* ─── LAYOUT ─── */
+#app{display:flex;max-width:1400px;margin:0 auto;min-height:calc(100vh - 80px)}
+/* ─── LEFT SIDEBAR ─── */
+#sidebar{width:var(--sidebar-w);min-width:var(--sidebar-w);background:#fff;border-right:1px solid #E2E8F0;position:sticky;top:68px;height:calc(100vh - 68px);overflow-y:auto;padding:12px 0}
+.sidebar-section-title{font-size:10px;font-weight:700;color:#94A3B8;text-transform:uppercase;letter-spacing:.08em;padding:8px 16px 4px}
+.phase-nav-text{display:flex;flex-direction:column;gap:1px;min-width:0}
+.phase-nav-label{font-size:12.5px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phase-nav-desc{font-size:10.5px;color:#94A3B8;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.phase-nav-item.active .phase-nav-desc{color:#93C5FD}
+.phase-nav-item:hover .phase-nav-desc{color:#93C5FD}
+.phase-nav-item{display:flex;align-items:center;gap:8px;padding:7px 16px;cursor:pointer;border-radius:6px;margin:1px 8px;font-size:12.5px;color:#374151;transition:.15s;position:relative}
+.phase-nav-item:hover{background:#F0F4FF;color:var(--primary)}
+.phase-nav-item.active{background:#EFF6FF;color:var(--primary);font-weight:600}
+.phase-nav-item .phase-badge{font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;background:#E2E8F0;color:#64748B;min-width:28px;text-align:center}
+.phase-nav-item.active .phase-badge{background:var(--primary);color:#fff}
+.phase-nav-item .hot-dot{width:7px;height:7px;border-radius:50%;background:#F97316;position:absolute;right:10px}
+.type-filter-wrap{padding:8px 10px;border-top:1px solid #F1F5F9;margin-top:8px}
+.type-btn{display:inline-block;margin:2px;padding:4px 8px;border:1.5px solid #CBD5E1;border-radius:12px;font-size:11px;cursor:pointer;transition:.15s;background:#fff;color:#374151}
+.type-btn:hover,.type-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+/* ─── MAIN AREA ─── */
+#main-area{flex:1;padding:20px;overflow:hidden}
+/* ─── SPLIT PANELS ─── */
+#content-row{display:flex;gap:18px;align-items:flex-start}
+#left-panel{flex:6;min-width:0}
+#right-panel{flex:4;min-width:0;position:sticky;top:88px}
+/* ─── PHASE SECTION ─── */
+.phase-section{margin-bottom:32px;display:none}
+.phase-section.visible{display:block}
+.phase-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid #E2E8F0}
+.phase-num{font-size:11px;font-weight:700;padding:3px 10px;border-radius:14px;background:var(--navy);color:#fff}
+.phase-title{font-size:17px;font-weight:700;color:var(--navy)}
+.phase-timer{font-size:11px;padding:3px 10px;background:#F1F5F9;color:#64748B;border-radius:12px}
+.hot-badge{font-size:11px;padding:3px 10px;background:var(--hot-bg);color:var(--hot-border);border:1px solid var(--hot-border);border-radius:12px;font-weight:600}
+/* ─── BLOCK LABEL ─── */
+.block-label{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:8px;margin-bottom:10px;letter-spacing:.04em}
+.block-1{background:#DBEAFE;color:#1E40AF}
+.block-2{background:#D1FAE5;color:#065F46}
+.block-3{background:#FEE2E2;color:#991B1B}
+/* ─── SCRIPT CARDS ─── */
+.script-card{background:var(--agent-bg);border-left:3px solid var(--primary);border-radius:0 var(--radius) var(--radius) 0;padding:14px 16px;margin-bottom:12px;box-shadow:var(--shadow)}
+.script-card.hot{background:var(--hot-bg);border-left-color:var(--hot-border)}
+.script-card-label{font-size:10px;font-weight:700;color:var(--primary);letter-spacing:.06em;margin-bottom:6px;text-transform:uppercase}
+.script-card.hot .script-card-label{color:var(--hot-border)}
+.script-text{font-size:13.5px;line-height:1.85;color:#1E293B;white-space:pre-wrap}
+.script-note{font-size:12px;color:#64748B;margin-top:6px;font-style:italic}
+/* ─── PRINCIPLE CARDS ─── */
+.principle-box{background:#FFFBEB;border:1px solid #FDE68A;border-radius:var(--radius);padding:12px 16px;margin-bottom:12px}
+.principle-box ul{padding-left:16px}
+.principle-box li{font-size:13px;line-height:1.8;color:#92400E}
+/* 본질 배너 */
+.phase-essence{display:flex;align-items:center;gap:8px;background:#EFF6FF;border-left:3px solid var(--primary);border-radius:0 8px 8px 0;padding:8px 14px;margin-bottom:14px;font-size:13px;color:#1E3A5F}
+.phase-essence .ess-arrow{font-weight:700;color:var(--primary);font-size:14px}
+.phase-essence .ess-text{font-weight:600;line-height:1.4}
+/* ─── WAIT TIME CARD ─── */
+.wait-card{background:#F0FDF4;border:1px solid #86EFAC;border-radius:var(--radius);padding:12px 16px;margin-bottom:12px}
+.wait-card .wc-title{font-size:12px;font-weight:700;color:#166534;margin-bottom:4px}
+.wait-card p{font-size:12.5px;color:#15803D;line-height:1.7}
+/* ─── RIGHT PANEL CARDS ─── */
+.rp-section{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:14px}
+.rp-title{font-size:12px;font-weight:700;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.rp-title::before{content:'';display:inline-block;width:3px;height:14px;background:var(--primary);border-radius:2px}
+.reaction-tag{display:inline-block;padding:4px 10px;border-radius:12px;font-size:12px;margin:3px 3px 3px 0;cursor:default}
+.tag-price{background:var(--tag-price-bg);color:var(--tag-price-text)}
+.tag-resist{background:var(--tag-resist-bg);color:var(--tag-resist-text)}
+.tag-answer{background:var(--tag-answer-bg);color:var(--tag-answer-text)}
+.tag-neutral{background:var(--tag-neutral-bg);color:var(--tag-neutral-text)}
+/* ─── REBUTTAL CARDS ─── */
+.rebuttal-item{border:1px solid #E2E8F0;border-radius:var(--radius);margin-bottom:8px;overflow:hidden}
+.rebuttal-trigger{padding:10px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:#F8FAFC;font-size:13px;font-weight:500;color:#374151;transition:.15s}
+.rebuttal-trigger:hover{background:#F0F4FF}
+.rebuttal-trigger .arrow{font-size:12px;color:#94A3B8;transition:.2s}
+.rebuttal-body{display:none;padding:12px 14px;font-size:13px;line-height:1.8;background:#fff;border-top:1px solid #F1F5F9;color:#374151;white-space:pre-wrap}
+.rebuttal-body.open{display:block}
+/* ─── LINKS / CHIPS ─── */
+.link-chip{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;background:var(--primary);color:#fff;border-radius:20px;font-size:12px;font-weight:500;margin:3px;transition:.15s;cursor:pointer}
+.link-chip:hover{background:#1D4ED8;color:#fff}
+.link-chip.secondary{background:#fff;color:var(--primary);border:1.5px solid var(--primary)}
+.link-chip.secondary:hover{background:#EFF6FF}
+.link-chip.orange{background:#EA580C;color:#fff}
+.link-chip.orange:hover{background:#C2410C}
+.chip-info{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:#F1F5F9;color:#475569;border-radius:12px;font-size:11.5px;margin:3px}
+/* ─── COMPARE TABLE ─── */
+.compare-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.5px}
+.compare-table th{background:var(--navy);color:#fff;padding:8px 10px;text-align:left;font-weight:600}
+.compare-table td{padding:7px 10px;border-bottom:1px solid #F1F5F9}
+.compare-table tr:nth-child(even) td{background:#F8FAFC}
+.compare-table .check{color:#16A34A;font-weight:700}
+.compare-table .cross{color:#DC2626}
+/* ─── PLAN TABLE ─── */
+.plan-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.5px}
+.plan-table th{background:#1E3A5F;color:#fff;padding:8px 12px;text-align:left}
+.plan-table td{padding:8px 12px;border-bottom:1px solid #E2E8F0}
+.plan-table tr.highlight td{background:#EFF6FF;font-weight:600;color:var(--primary)}
+/* ─── GATE CHECKLIST ─── */
+.gate-list{list-style:none;padding:0}
+.gate-list li{display:flex;align-items:flex-start;gap:8px;padding:5px 0;font-size:13px;border-bottom:1px solid #F1F5F9;color:#374151}
+.gate-list li::before{content:'□';font-size:14px;color:#94A3B8;flex-shrink:0;margin-top:1px}
+/* ─── TYPE CARDS (SIDEBAR SECTION) ─── */
+.type-detail-section{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:10px;display:none}
+.type-detail-section.active{display:block}
+.type-header{font-size:13px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.type-kpi{font-size:11.5px;color:#64748B;margin-bottom:8px}
+.type-rule{font-size:12.5px;color:#374151;line-height:1.7;padding-left:12px;border-left:2px solid var(--primary)}
+/* ─── HIGHLIGHT ─── */
+.hl{background:#FEF08A;border-radius:2px;padding:0 1px}
+/* ─── MOTION TIMELINE ─── */
+.emotion-steps{display:flex;flex-direction:column;gap:0}
+.emotion-step{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-left:2px solid #E2E8F0;padding-left:14px;position:relative;margin-left:8px}
+.emotion-step::before{content:attr(data-n);position:absolute;left:-10px;width:18px;height:18px;background:var(--primary);color:#fff;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;top:10px}
+.emotion-step-title{font-size:12.5px;font-weight:700;color:var(--navy)}
+.emotion-step-desc{font-size:12px;color:#64748B;line-height:1.6}
+/* ─── BLOCK CRUD CONTROLS ─── */
+.block-wrap{position:relative}
+.block-wrap:hover .block-ctrl{opacity:1;pointer-events:auto}
+.block-ctrl{position:absolute;top:6px;right:6px;display:flex;gap:4px;opacity:0;pointer-events:none;transition:.15s;z-index:10}
+.block-ctrl button{padding:3px 7px;font-size:11px;border:1px solid #CBD5E1;border-radius:6px;background:#fff;cursor:pointer;line-height:1.4;font-family:inherit;transition:.15s}
+.block-ctrl button:hover{background:var(--navy);color:#fff;border-color:var(--navy)}
+.block-ctrl .btn-del:hover{background:#DC2626;border-color:#DC2626}
+.block-ctrl .btn-pin{color:#F59E0B}
+.block-ctrl .btn-pin:hover{background:#F59E0B;color:#fff;border-color:#F59E0B}
+.pinned-block{border-left-color:#F59E0B!important;background:#FFFBEB!important}
+.pinned-label{font-size:10px;font-weight:700;color:#F59E0B;margin-bottom:4px;display:flex;align-items:center;gap:4px}
+/* Add block button */
+.add-block-btn{display:flex;align-items:center;gap:6px;margin:10px 0 4px;padding:8px 14px;background:#F0F9FF;border:1.5px dashed #93C5FD;border-radius:var(--radius);font-size:12.5px;color:#2563EB;cursor:pointer;font-family:inherit;width:100%;transition:.15s}
+.add-block-btn:hover{background:#DBEAFE;border-color:#2563EB}
+/* Edit modal */
+#block-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9000;align-items:center;justify-content:center;padding:20px}
+#block-modal.open{display:flex}
+#block-modal-box{background:#fff;border-radius:14px;width:100%;max-width:600px;padding:24px;box-shadow:0 8px 40px rgba(0,0,0,.25)}
+#block-modal-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:14px}
+#block-modal-label{width:100%;padding:8px 12px;border:1.5px solid #CBD5E1;border-radius:8px;font-size:13px;font-family:inherit;margin-bottom:10px}
+#block-modal-content{width:100%;height:160px;padding:10px 12px;border:1.5px solid #CBD5E1;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;line-height:1.7}
+#block-modal-note{width:100%;padding:7px 12px;border:1.5px solid #CBD5E1;border-radius:8px;font-size:12px;font-family:inherit;margin-top:8px;color:#64748B}
+#block-modal-author{width:100%;padding:8px 12px;border:1.5px solid #FCA5A5;border-radius:8px;font-size:13px;font-family:inherit;margin-top:10px;background:#FFF5F5}
+#block-modal-author:focus{outline:none;border-color:#DC2626;box-shadow:0 0 0 3px rgba(220,38,38,.1)}
+#block-modal-author.error{border-color:#DC2626;animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.block-modifier{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#64748B;background:#EFF6FF;border-radius:6px;padding:2px 7px;margin-left:4px;flex-shrink:0;white-space:nowrap}
+.block-modifier .mod-name{font-weight:700;color:#2563EB}
+.block-modifier .mod-time{color:#94A3B8;margin-left:2px}
+.modal-row{display:flex;gap:8px;margin-top:14px}
+.modal-btn{flex:1;padding:9px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.modal-btn-save{background:var(--primary);color:#fff}
+.modal-btn-save:hover{background:#1D4ED8}
+.modal-btn-cancel{background:#F1F5F9;color:#374151}
+.modal-btn-cancel:hover{background:#E2E8F0}
+/* ─── PRINT ─── */
+@media print{
+  #top-header,#sidebar,#progress-bar-wrap{display:none!important}
+  #app{display:block}
+  #content-row{display:block}
+  #right-panel{position:static}
+  .phase-section{display:block!important;page-break-inside:avoid}
+  .rebuttal-body{display:block!important}
+}
+/* ─── MOBILE ─── */
+@media(max-width:900px){
+  #sidebar{display:none}
+  #content-row{flex-direction:column}
+  #right-panel{position:static}
+  #top-header{flex-wrap:wrap;gap:8px}
+  #search-wrap{max-width:100%;order:3;flex:1 1 100%}
+}
+@media(max-width:600px){
+  #main-area{padding:12px}
+  .phase-title{font-size:15px}
+}
+/* ─── SECTION VISIBILITY OVERRIDE ─── */
+.all-visible .phase-section{display:block}
+</style>
+</head>
+<body>
+
+<!-- STICKY HEADER -->
+<div id="top-header">
+  <div class="logo">🛳 크루즈<span>닷</span> 콜스크립트</div>
+  <div id="search-wrap">
+    <input id="search-input" type="text" placeholder="검색: 상조, 욕망, 클로징, 렌탈, SPIN..." autocomplete="off">
+    <span id="search-clear" onclick="clearSearch()">✕</span>
+    <ul id="autocomplete-box"></ul>
+  </div>
+  <span id="search-count"></span>
+  <div class="header-btns">
+    <button class="btn-sm" onclick="showAll()">전체보기</button>
+    <button class="btn-sm" onclick="window.print()">🖨 인쇄</button>
+    <a class="btn-sm" href="https://roaring-fox-9f3ba7.netlify.app/" target="_blank" style="text-decoration:none">🌐 랜딩페이지</a>
+  </div>
+</div>
+<div id="progress-bar-wrap"><div id="progress-bar"></div></div>
+
+<div id="app">
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-section-title">Phase 진행</div>
+  <div id="phase-nav"></div>
+  <div class="sidebar-section-title" style="margin-top:12px">고객 유형 필터</div>
+  <div class="type-filter-wrap" id="type-filter-wrap"></div>
+  <div class="sidebar-section-title" style="margin-top:12px">절대 원칙</div>
+  <div style="padding:8px 14px;font-size:11.5px;color:#DC2626;line-height:1.8">
+    ① 욕망 먼저<br>
+    ② 상조/렌탈 Phase8.5만<br>
+    ③ 가격 Phase8 이후<br>
+    ④ 포지셔닝 먼저<br>
+    ⑤ 렌탈=보너스<br>
+    ⑥ 고객이 솔루션 요청하게<br>
+    ⑦ 포기하지 않는다
+  </div>
+  <div style="padding:4px 14px 12px;font-size:11px;color:#94A3B8">v19 | 2026-03-20</div>
+</nav>
+
+<!-- MAIN -->
+<div id="main-area">
+<div id="content-row">
+<div id="left-panel" id="phases-container">
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 0 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section visible" id="phase-0" data-phase="0">
+  <div class="phase-header">
+    <span class="phase-num">Phase 0</span>
+    <span class="phase-title">신원확립 + 내부자 훅</span>
+    <span class="phase-timer">⏱ 0~2분</span>
+    <span class="block-label block-1">BLOCK 1 — OPEN</span>
+  </div>
+  <div class="principle-box">
+    <b style="color:#92400E">목적:</b>
+    <ul><li>보이스피싱 해소 + 크루즈 세계관 입장 허락</li><li>경계 해제 + 대화 허락 받기</li><li>결정권자 본인 여부 확인</li></ul>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">A형 오프닝 — 가치 선행형 (FIX-01)</div>
+    <div class="script-text">"안녕하세요 선생님, 크루즈닷 담당 [이름]이에요.
+저희 고객분 중에 [지역] 쪽에 계신 분들께
+크루즈 여행 멤버십 안내드리고 있는데요.
+잠깐 들어보실래요?"</div>
+    <div class="script-note">★ 가치 선행 — 먼저 혜택 단어 투입 후 허락 요청</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">B형 오프닝 — 호기심 유발형 (FIX-01)</div>
+    <div class="script-text">"안녕하세요 선생님, 잠깐 여쭤봐도 될까요?
+크루즈 여행 한 번 가보고 싶으셨던 적 있으세요?"</div>
+    <div class="script-note">→ 고객이 "네" / "가고 싶었는데요" → Phase 1 즉시 진입</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">C형 오프닝 — 표준형</div>
+    <div class="script-text">"안녕하세요 선생님, 저는 크루즈닷 담당 [이름]이에요.
+잠깐 여쭤봐도 될까요?
+선생님 카카오톡 사용하세요?"</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">번호 출처 질문 대응</div>
+    <div class="script-text">"선생님, 저희 쪽에 신청하신 이력이 있어서요.
+따로 문자 먼저 보내드렸는데 받으셨어요?
+크루즈닷 공식 번호로 드렸거든요."</div>
+    <div class="script-note">→ 보이스피싱 의심 즉시 해소 카드</div>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">🛡 갑 위치 확보 — 부탁형 완전 제거</div>
+    <div class="script-text">"선생님, 저는 뭔가 사달라고 전화드린 게 아니에요.
+정보 드리러 전화드린 거예요.
+들어보시고 도움이 되시면 좋고, 아니면 괜찮고요.
+5분만 들어보세요."</div>
+    <div class="script-note">→ 전화 초반 경계 높을 때 사용. "부탁→정보제공자" 포지션 전환 = 저항 즉시 30% 하락</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">결정권자 확인 (신뢰 앵커 직후)</div>
+    <div class="script-text">"선생님이 직접 결정하시는 편이세요?
+아니면 남편분이랑 같이 보시는 편이세요?"</div>
+    <div class="script-note">→ 핑퐁형 사전 감지 — 결정권자 아니면 TYPE4 분기 준비</div>
+  </div>
+  <div class="wait-card">
+    <div class="wc-title">⏸ Wait Time 원칙</div>
+    <p>질문 후 최소 3~5초 침묵 유지. 절대 먼저 채우지 않는다.<br>고객이 침묵 = 생각 중 (방해 금지)</p>
+  </div>
+  <div style="margin-top:10px">
+    <a class="link-chip" href="https://roaring-fox-9f3ba7.netlify.app/" target="_blank">🌐 랜딩페이지 바로가기</a>
+    <span class="chip-info">관광사업자 2025-000004호</span>
+    <span class="chip-info">판교 본사 031-756-4025</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 1 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-1" data-phase="1">
+  <div class="phase-header">
+    <span class="phase-num">Phase 1</span>
+    <span class="phase-title">크루즈 니즈 파악 (SPIN-S)</span>
+    <span class="phase-timer">⏱ 2~5분</span>
+    <span class="block-label block-1">BLOCK 1 — OPEN</span>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">핵심 질문</div>
+    <div class="script-text">"선생님, 혹시 크루즈 여행 가보신 적 있으세요?
+아니면 한번 가보고 싶으셨던 적은요?"</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">프리미엄 이미지 선제 구축 (TYPE1 상조의심 방어)</div>
+    <div class="script-text">"저희 크루즈닷은 크루즈 여행 전문 멤버십이에요.
+타사랑 완전히 다른 게 있는데요.
+
+첫 번째, 1:1 담당 매니저예요.
+출발 전 준비부터 귀국 후까지 담당 매니저 1명이
+전담으로 케어해드려요. 어떤 여행사도 이건 없어요.
+
+두 번째, 베테랑 인솔팀이에요.
+가이드 10년차, 인솔자 11년차 —
+모두투어·하나투어·참좋은·미리크루즈 인솔 나가는 바로 그 팀이에요.
+
+세 번째, 전문 작가 파일 전달이에요.
+전문 사진작가, 전문 비디오작가가 동행해서
+고화질 사진·영상 파일 다 드려요."</div>
+    <div class="script-note">→ 이 발화가 끝나면 "상조"로 연상할 틈이 없어진다</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">니즈 심화 질문</div>
+    <div class="script-text">"어디 크루즈가 제일 끌리세요?
+일본이요, 지중해요, 동남아요?"</div>
+    <div class="script-note">⏸ 4~5초 침묵 — 고객이 스스로 이미지 그리게</div>
+  </div>
+
+  <table class="compare-table" style="margin-top:12px">
+    <tr><th>항목</th><th>크루즈닷</th><th>일반 여행사</th></tr>
+    <tr><td>담당 매니저</td><td class="check">✅ 1:1 전담</td><td class="cross">❌ 없음</td></tr>
+    <tr><td>가이드 경력</td><td class="check">✅ 10년차 베테랑</td><td class="cross">❌ 경력 불명</td></tr>
+    <tr><td>인솔자 경력</td><td class="check">✅ 11년차 베테랑</td><td class="cross">❌ 경력 없거나 불명</td></tr>
+    <tr><td>전문 사진작가</td><td class="check">✅ 동행 + 파일 전달</td><td class="cross">❌ 없음</td></tr>
+    <tr><td>전문 비디오작가</td><td class="check">✅ 동행 + 파일 전달</td><td class="cross">❌ 없음</td></tr>
+    <tr><td>준비금 보장</td><td class="check">✅ 신한은행 보관</td><td class="cross">❌ 없음</td></tr>
+  </table>
+  <div class="script-card">
+    <div class="script-card-label">💬 Challenger Warmer — 공감 진입</div>
+    <div class="script-text">"아이들 다 시집·장가 가시고 많이 조용해지셨죠?
+저희 고객분들 대부분 그 시점에서 '이제 내 차례'라고 깨닫고 시작하세요.
+선생님도 그런 마음 드세요?"</div>
+    <div class="script-note">⏸ 4초 — "네" 발화 = Phase 2 진입 허가서</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">💡 스탭 동행 — 선내 구체 가치 (차별점 핵심)</div>
+    <div class="script-text">"저희 스탭이 구체적으로 해드리는 게요:
+① 승선 첫날 정찬 레스토랑·특별 식당 예약 전부 도와드려요
+② 선내 쇼·강연·액티비티 한국어로 100% 안내 — 혼자라면 절반도 못 누려요
+③ 선내 팁·추가요금 사전 설명 — 하선할 때 예상 밖 청구서 절대 없음
+④ 의료·비상 상황 시 메디컬센터 즉시 대응
+
+일반 여행사 패키지로 가시면 이 네 가지 전부 혼자 해결이에요."</div>
+    <div class="script-note">→ "스탭이 있고 없고 차이" = 여행의 질 자체가 다름</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">🗺 기항지 투어 — 한국어 단독 진행 (차별점 핵심)</div>
+    <div class="script-text">"기항지 투어도 저희 인솔팀이 한국어로 단독 진행해요.
+일반 크루즈 패키지는 기항지에서 영어 투어 대기줄 서야 하거든요.
+저희는 한국어로 전담 안내고, 배 다시 탈 타임도 저희가 체크해드려요.
+놓칠 일이 없어요."</div>
+    <div class="script-note">→ 5060 고객 영어 불안 즉시 해소 + 안전감 제공</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">🏥 시니어 케어 — 50~60대 맞춤 (헬스케어 포함)</div>
+    <div class="script-text">"저희 멤버십에 헬스케어 혜택도 있어요.
+전문 의료진 상담, 전국 검진기관 예약 대행 — 50% 이상 우대예요.
+서울아산·삼성서울·서울대 같은 상급병원 진료 예약도 대행해드려요.
+여행 가시기 전에 건강 체크도 같이 되는 거죠."</div>
+    <div class="script-note">→ 50~60대 건강 걱정 선제 해소 + 멤버십 가치 극대화</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 2 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-2" data-phase="2">
+  <div class="phase-header">
+    <span class="phase-num">Phase 2</span>
+    <span class="phase-title">니즈 증폭 (SPIN-P)</span>
+    <span class="phase-timer">⏱ 5~7분</span>
+    <span class="block-label block-1">BLOCK 1 — OPEN</span>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">여행 경험 라포 + 문제 유도</div>
+    <div class="script-text">"선생님은 어디 여행 제일 좋아하세요?
+가장 기억에 남는 여행이 어디예요?"</div>
+    <div class="script-note">⏸ 4초 — 고객이 먼저 말하게. 그 답이 욕망의 씨앗</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">왜 아직 못 갔는지 고객이 말하게</div>
+    <div class="script-text">"크루즈 한 번 가보고 싶으셨다고 하셨는데
+왜 아직 못 가셨어요? 뭐가 걸리셨어요?"</div>
+    <div class="script-note">⏸ 5초 — 절대 먼저 채우지 않는다. 고객이 장벽을 스스로 말해야 한다</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">공감 + 증폭</div>
+    <div class="script-text">"맞아요. 보통 직접 준비하시면
+항공 예약, 크루즈 예약, 숙박 따로, 관광 옵션 따로,
+보험 따로... 영어로 다 하셔야 하고,
+현지에서 문제 생겨도 혼자 해결하셔야 해요.
+직접 준비해보시면 어떨 것 같아요?"</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">💬 감정 증폭 질문</div>
+    <div class="script-text">"그때 그 여행, 같이 가고 싶은 분이 계세요?
+남편분이랑? 아니면 친구분들이랑?"</div>
+    <div class="script-note">⏸ 4초 — 동반자를 떠올리게 → 감정 욕망 2배 증폭. "같이 가고 싶다" 발화 대기</div>
+  </div>
+  <div class="wait-card">
+    <div class="wc-title">⚠ SPIN 원칙</div>
+    <p>상담사 입에서 부정 발화 금지 — 장벽·문제는 고객 입에서 나와야 한다.<br>
+    ❌ "비싸서 못 가시는 거잖아요?"<br>
+    ✅ "지금까지 어떻게 됐어요?" (침묵)</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 3 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-3" data-phase="3">
+  <div class="phase-header">
+    <span class="phase-num">Phase 3</span>
+    <span class="phase-title">욕망 부풀리기 + 5감 이미지</span>
+    <span class="phase-timer">⏱ 7~10분</span>
+    <span class="hot-badge">🔥 욕망 1회 목표</span>
+    <span class="block-label block-1">BLOCK 1 — OPEN</span>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">🔥 핵심 욕망 유도 발화</div>
+    <div class="script-text">"선생님, 잠깐 상상해보세요.
+
+크루즈에서 일본 기항지에 내려서
+골목 산책하고 다시 배로 돌아오는 그 느낌.
+
+배 위에서 보는 일몰 — 바다 냄새,
+바람, 수평선.
+
+그 창문 앞에 서 계신다면 어떨 것 같으세요?"</div>
+    <div class="script-note">⏸ 4~5초 침묵 — 고객이 "너무 좋겠다" / "가고싶다" 발화 대기 = 욕망 1회 ✓</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">럭셔리 스펙 힌트 (설명 X, 질문으로 마무리)</div>
+    <div class="script-text">"MSC 벨리시마 같은 경우에는요 —
+레스토랑만 12개에, 아케이드 쇼핑몰이 70m,
+1,400석짜리 극장에서 웨스트엔드급 뮤지컬을 봐요.
+
+선생님은 크루즈에서 뭘 제일 해보고 싶으세요?"</div>
+    <div class="script-note">⏸ 4초 — 고객이 스스로 욕망을 말하게</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">독거 분기 — 자기선물 트리거 (FIX-04)</div>
+    <div class="script-text">"혼자 가시는 분들도 많이 있어요.
+오히려 내 페이스대로 즐길 수 있어서
+혼자 오시는 분들이 더 만족하시더라고요.
+선생님 자신한테 선물 한번 해드리는 거예요."</div>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">⏰ 체력 창문 — 5년 뒤 무릎 (Loss Aversion)</div>
+    <div class="script-text">"저 10년 넘게 이 일 했는데요,
+'5년 뒤에 가려고 했는데 무릎이 안 좋아져서 못 갔다'
+이 말씀을 진짜 많이 들어요.
+그때 '진작 갈 걸' 하시더라고요.
+
+선생님이 지금 체력으로 가실 때가
+가장 편하게 즐기실 수 있는 시기예요."</div>
+    <div class="script-note">⏸ 4초 — 고객이 스스로 긴급성 느끼게. 절대 먼저 채우지 않는다</div>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">🔥 GREEN LIGHT — HOT 2개+ 감지 시 Phase 7 직행 (FIX, v19.4)</div>
+    <div class="script-text">고객이 욕망 표현을 2회 이상 발화한 경우:
+"어떻게 하면 되는 거예요?" 또는 "얼마예요?" 발화 시
+
+→ Phase 4~6 SKIP → Phase 7 직행
+→ "선생님이 원하시는 거 바로 말씀드릴게요."</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 4 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-4" data-phase="4">
+  <div class="phase-header">
+    <span class="phase-num">Phase 4</span>
+    <span class="phase-title">럭셔리 크루즈 확대 (400만원 앵커)</span>
+    <span class="phase-timer">⏱ 10~12분</span>
+    <span class="block-label block-2">BLOCK 2 — DEEPEN</span>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">포지셔닝 질문 (가격 선행 차단)</div>
+    <div class="script-text">"크루즈요 — 가성비로 한번 가고 싶으신 편이에요,
+아니면 이왕이면 럭셔리하게 제대로 한번 가보고 싶다는 마음이 있으세요?"</div>
+    <div class="script-note">⏸ 3초 — 고객이 직접 선택하게. 상담사가 먼저 말하지 않는다</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">자기상상 유도 (럭셔리 선택 시)</div>
+    <div class="script-text">"비용이나 시간 제약이 없다면,
+선생님이 딱 한번 타고 싶은 크루즈가 어떤 건지
+상상해 보셨어요? 지중해요, 동남아요, 다른 데요?"</div>
+    <div class="script-note">⏸ 5초 — 절대 먼저 채우지 않는다</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">자기앵커링 + 400만원 앵커</div>
+    <div class="script-text">"그 여행이요 — 직접 알아보신다면 얼마 정도 될 것 같으세요?
+대충 어림잡아서요."</div>
+    <div class="script-note">⏸ 4초 — 고객이 먼저 추정하게</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">앵커 확인 브릿지</div>
+    <div class="script-text">"맞아요. 항공에 크루즈에 현지 투어까지
+2인 기준 300~400만원 이상이거든요. 그게 현실이에요."</div>
+    <div class="script-note">⏸ 3초 — "이게 현실이에요" 후 절대 채우지 않는다</div>
+  </div>
+  <div style="background:#F0F4FF;border-radius:var(--radius);padding:12px 14px;font-size:12.5px;margin-top:8px">
+    <b style="color:var(--navy)">💡 400만원 계산 흐름</b><br>
+    항공 왕복 2인 120만원 + 발코니 캐빈 7박 200만원 + 기항지 투어 60만원 + 선내 팁 20만원 = <b>400만원</b>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">🍚 한국 음식 걱정 대응 (5060 필수 걱정)</div>
+    <div class="script-text">"한국 음식 걱정되시죠? 코스타 세레나 기준으로
+뷔페에 한식 메뉴 항상 있어요 — 김치, 된장국, 갈비까지요.
+그리고 저희는 오프시즌 상품을 권하기 때문에
+성수기 혼잡 없이 같은 배를 70% 가격에, 3분의 1 인원으로 즐기세요."</div>
+    <div class="script-note">→ 한국 음식 + 혼잡 두 가지 걱정 동시에 해소</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">💡 Challenger Reframe — 여행 = 건강·자존감 투자</div>
+    <div class="script-text">"다들 여행이 사치라고 생각해요.
+근데 요즘 웰니스 시대잖아요.
+의료비, 운동비 쓰듯이 여행비를 자존감 투자로 보는 분들이 많아요.
+특히 50대 이상은 여행 한 번이 몇 년을 더 사는 거거든요."</div>
+    <div class="script-note">→ "여행=사치" 프레임을 "여행=투자"로 전환 — 죄책감 해제</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 5 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-5" data-phase="5">
+  <div class="phase-header">
+    <span class="phase-num">Phase 5</span>
+    <span class="phase-title">장벽 인식 (고객 입으로)</span>
+    <span class="phase-timer">⏱ 12~14분</span>
+    <span class="block-label block-2">BLOCK 2 — DEEPEN</span>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">장벽 질문 — 고객이 스스로 말하게</div>
+    <div class="script-text">"선생님은 지금까지 왜 못 가셨어요?
+어떤 게 걸리셨어요?"</div>
+    <div class="script-note">⏸ 5초 — 반드시 기다린다. 고객이 장벽을 직접 말해야 효과</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">타사 여행의 불편함 (P질문)</div>
+    <div class="script-text">"보통 여행사 패키지로 가시면
+가이드가 누구인지 경력이 어떤지도 모르고,
+사진은 같이 간 분한테 부탁하거나 혼자 찍으셔야 하잖아요.
+거기다 현지에서 문제 생기면 혼자 해결이고요.
+불편하셨던 적 없으세요?"</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">해결되면 못 가실 이유 확인 (5초 침묵)</div>
+    <div class="script-text">"만약에 비용 문제가 해결된다면
+못 가실 이유 있어요?"</div>
+    <div class="script-note">⏸ 5초 침묵 — "없어요" 발화 = 허가서 1단계</div>
+  </div>
+  <div class="wait-card">
+    <div class="wc-title">⚠ 핵심 원칙</div>
+    <p>상담사가 결론을 말하면 역효과. 반드시 고객 입으로 나와야 함.<br>
+    ❌ "이래서 못 가시는 거잖아요"<br>
+    ✅ "그게 지금 있으세요?" (침묵)</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 6 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-6" data-phase="6">
+  <div class="phase-header">
+    <span class="phase-num">Phase 6</span>
+    <span class="phase-title">최악 시나리오 + 결심 유도 (SPIN-I 심화)</span>
+    <span class="phase-timer">⏱ 14~15분</span>
+    <span class="block-label block-2">BLOCK 2 — DEEPEN</span>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">계단 1 — 자기보상 박탈</div>
+    <div class="script-text">"아이들 대학·결혼·손주...
+나 자신을 위한 건 없었죠?"
+
+[3자 스토리]
+"62세 분이 달력 보다가 '내 인생에 내 선물이 없었네' 하셨어요.
+그 감정 선생님은 어떨 것 같으세요?"</div>
+    <div class="script-note">⏸ 4초</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">계단 2 — 시간 긴급성</div>
+    <div class="script-text">[비교 이미지]
+"65세 두브로브니크 성벽 vs 74세 버스 창문 대기"
+
+"선생님 지금 몇 세세요?
+갈 수 있는 시간이 얼마나 되실 것 같아요?"</div>
+    <div class="script-note">⏸ 4초 — 고객이 스스로 긴급성 느끼게</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">계단 5 — 결심 유도 (최종)</div>
+    <div class="script-text">"1년 뒤에도 이 상태라면
+선생님 인생에서 이 여행이 어떻게 될 것 같아요?"</div>
+    <div class="script-note">⏸ 6초 침묵 — 절대 먼저 채우지 않는다</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">💬 자기정당화 조력 — 허락 부여</div>
+    <div class="script-text">"선생님이 지금까지 얼마나 많이 해오셨어요.
+자신한테도 투자할 자격 충분히 있으시죠.
+이 정도는 충분히 받으셔도 돼요."</div>
+    <div class="script-note">⏸ 3초 — 고객이 "그렇죠" 발화하면 Phase 7 진입</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 7 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-7" data-phase="7">
+  <div class="phase-header">
+    <span class="phase-num">Phase 7</span>
+    <span class="phase-title">해결 질문 — 허가서 발급 (SPIN-N)</span>
+    <span class="phase-timer">⏱ 15분</span>
+    <span class="block-label block-2">BLOCK 2 — DEEPEN</span>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">🔑 허가서 질문 — 고객이 먼저 솔루션 요청하게</div>
+    <div class="script-text">"어떻게 되면 딱 좋겠다 싶으세요?"</div>
+    <div class="script-note">⏸ 5초 침묵 — "방법이 있어요?" 발화 = 허가서 발급 완료 → Phase 8 진입</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">N질문 — 해결 가치 유도</div>
+    <div class="script-text">"만약에 이걸 전부 하루 1,100원으로 해결할 수 있고,
+담당 매니저가 출발부터 귀국까지 케어해준다면
+어떨 것 같으세요?"</div>
+    <div class="script-note">⏸ 4초 — "그러면 좋겠는데요" = 허가서</div>
+  </div>
+  <div class="principle-box">
+    <ul>
+      <li>고객이 "네" 말하기 전 상품 꺼내면 즉시 방어 발동</li>
+      <li>Phase 7 N질문 완성 전 상품 안내 절대 금지</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 8 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-8" data-phase="8">
+  <div class="phase-header">
+    <span class="phase-num">Phase 8</span>
+    <span class="phase-title">상품 안내 + 플랜 앵커링</span>
+    <span class="phase-timer">⏱ 15~17분</span>
+    <span class="block-label block-2">BLOCK 2 — DEEPEN</span>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">💬 SPIN-N 연장 — 욕망 확인 후 상품 진입</div>
+    <div class="script-text">"선생님, 솔직하게 여쭤볼게요.
+아까 말씀하신 [여행지], 내년 안에 한번 가볼 수 있다면
+진짜 가고 싶으세요?"</div>
+    <div class="script-note">⏸ 4초 — "네" / "가고 싶죠" 발화 확인 후 상품 진입. 고객이 스스로 욕망 재확인하게</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">💬 SPIN-N 연장 — 필요성 자각 유도</div>
+    <div class="script-text">"그러면요, 지금 혼자 준비하시면 얼마나 복잡할 것 같으세요?
+항공, 크루즈, 현지 투어, 영어 처리... 다 혼자 하시는 거잖아요."</div>
+    <div class="script-note">⏸ 4초 — 고객이 "복잡하겠다"고 스스로 말하면 = 솔루션 진입 허가 신호</div>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">🔥 핵심 발화 — "하루 1,100원" (3초 포즈)</div>
+    <div class="script-text">"크루즈닷 A플랜이요 — 하루 1,100원이에요."</div>
+    <div class="script-note">⏸ 3초 포즈 — 절대 채우지 않는다</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">포함 가치 전달</div>
+    <div class="script-text">"이 금액에 항공+크루즈+숙박+식사+보험에다
+10년차 가이드, 11년차 인솔자, 전문 사진·영상 파일까지
+전부 포함이에요.
+
+타사에서 이걸 각각 준비하시면 최소 200만원은 넘어요.
+그리고 타사는 베테랑 가이드·인솔자·담당 매니저가 없어요."</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">3플랜 소개 (30초 버전)</div>
+    <div class="script-text">"플랜이 세 가지예요.
+A플랜: 월 33,000원 → 일본·홍콩·대만 근교 프리미엄 패키지
+B플랜: 월 66,000원 → 동남아 프리미엄 패키지
+C플랜: 월 99,000원 → 지중해·유럽·알래스카
+
+항공+크루즈+숙박+식사+보험+베테랑 인솔팀+전문 촬영 파일 전부 포함이에요.
+어느 게 편하세요?"</div>
+  </div>
+  <table class="plan-table">
+    <tr><th>플랜</th><th>월 납입</th><th>하루</th><th>여행지</th></tr>
+    <tr class="highlight"><td><b>A플랜</b></td><td>33,000원</td><td>1,100원</td><td>일본·홍콩·대만</td></tr>
+    <tr><td><b>B플랜</b></td><td>66,000원</td><td>2,200원</td><td>동남아(태국·베트남)</td></tr>
+    <tr><td><b>C플랜</b></td><td>99,000원</td><td>3,300원</td><td>지중해·유럽·알래스카</td></tr>
+  </table>
+  <div style="margin-top:12px">
+    <a class="link-chip orange" href="http://leadz.kr/vvo" target="_blank">📋 신청 링크</a>
+    <span class="chip-info">14일 환불 보장</span>
+    <span class="chip-info">신한은행 직접 지급보증</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 8.5 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-8-5" data-phase="8.5">
+  <div class="phase-header">
+    <span class="phase-num">Phase 8.5 ⭐</span>
+    <span class="phase-title">상조/렌탈 보너스 등장</span>
+    <span class="phase-timer">⏱ 17~19분</span>
+    <span class="block-label block-2">BLOCK 2 — DEEPEN</span>
+  </div>
+  <div class="principle-box">
+    <ul>
+      <li>이 Phase는 Phase 8 이후에만 등장 — Phase 1~8 완전 봉인</li>
+      <li>렌탈 = 반론 카드가 아닌 <b>보너스·선물 프레임</b> 유지</li>
+      <li>TYPE1 확정 감지 시 이 Phase SKIP → Phase 9 직행 (FIX-05)</li>
+    </ul>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">⭐ 보너스 등장 핵심 발화</div>
+    <div class="script-text">"선생님, 사실 하나 더 있어요."</div>
+    <div class="script-note">⏸ 2초 포즈</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">가전 혜택 소개 (선물 프레임)</div>
+    <div class="script-text">"집에 가전이 들어오는 건데요.
+따로 신청하시면 몇십만원인데 — 이게 같이 오는 거예요."</div>
+    <div class="script-note">⏸ 2초 포즈</div>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">⭐ 플랜별 가전 스펙 (A/B/C 구체 제시)</div>
+    <div class="script-text">A플랜 (월 33,000원):
+삼성 2도어 냉장고 255L + 더함 50인치 TV + 쿠쿠 무선청소기 + 브람스 안마베드
+
+B플랜 (월 66,000원):
+삼성 에어드레서 + 제트 AI Lite 무선청소기 + 삼성 55인치 QLED TV + 로보락 로봇청소기 + 브람스 안마의자
+
+C플랜 (월 99,000원):
+삼성 더 세리프 55인치 TV + 더함 85인치 QLED + 삼성 양문형 냉장고 852L + 삼성 에어드레서 대용량
+
+"어느 플랜이 눈에 들어오세요?"</div>
+    <div class="script-note">⏸ 3초 — "여행 가시기 전에 집이 먼저 바뀌는 거잖아요." ⏸ 2초 "어때요?"</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">렌탈 의심 대응 (4가지 근거)</div>
+    <div class="script-text">"혹시 상조랑 다른 거 맞냐고 하시는 분들 있는데요.
+
+① 크루즈닷은 관광사업자 등록된 정식 여행사예요 (2025-000004호)
+② 준비금은 신한은행 별도 신탁 계좌 보관 — 크루즈닷이 절대 건드릴 수 없어요
+③ 가전은 만기 때 회원비 100% 환급 + 가전 구매 지원을 받는 구조예요
+④ 본 상품은 크루즈 여행이고, 가전은 덤으로 받으시는 거예요"</div>
+    <div class="script-note">→ TYPE1(상조의심) 확인 시 ①②③ 먼저, "더좋은라이프" 언급 금지</div>
+  </div>
+  <div style="margin-top:8px">
+    <a class="link-chip secondary" href="https://roaring-fox-9f3ba7.netlify.app/" target="_blank">렌탈 상품 보기</a>
+    <a class="link-chip secondary" href="http://leadz.kr/vvo" target="_blank">버버리 후기</a>
+    <a class="link-chip secondary" href="http://leadz.kr/vvn" target="_blank">구찌 후기</a>
+    <a class="link-chip secondary" href="http://leadz.kr/vvp" target="_blank">안마의자 후기</a>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 9 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-9" data-phase="9">
+  <div class="phase-header">
+    <span class="phase-num">Phase 9</span>
+    <span class="phase-title">Three 10s 신뢰 구축</span>
+    <span class="phase-timer">⏱ 19~22분</span>
+    <span class="block-label block-2">BLOCK 2 — DEEPEN</span>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">회사 신뢰 (10점)</div>
+    <div class="script-text">"크루즈닷이 11년째 운영 중이고,
+준비금을 신한은행에서 안전 보관해요.
+관광사업자 등록번호 2025-000004호예요.
+네이버에 '크루즈닷' 검색하시면 나와요."</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">제품 신뢰 (10점)</div>
+    <div class="script-text">"저희 인솔팀이 모두투어·하나투어·참좋은·미리크루즈에서
+인솔 나가는 바로 그 팀이에요.
+3,000명 넘게 함께 다녀왔어요.
+업계 최고 여행사들이 선택한 팀이 크루즈닷 고객 전담으로 하는 거거든요."</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">담당자 신뢰 (10점)</div>
+    <div class="script-text">"저는 크루즈닷 담당 매니저 [이름]이에요.
+선생님 가입하시면 제가 직접 담당 매니저로 배정돼요.
+출발 전 연락드리고, 여행 중에도 제 번호로 연락되고,
+귀국 후 사진·영상 파일도 제가 전달해드려요."</div>
+    <div class="script-note">→ 실명 공개 = 사기꾼과 구분 + 신뢰 즉시 상승</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">검증 초대 카드 (FIX-02, 의심형 전용)</div>
+    <div class="script-text">"저희가 맞는지 한번 확인해보세요.
+포털에 '크루즈닷' 검색하시면 후기랑 정보 나와요.
+관광사업자 등록번호 2025-000004호 — 직접 조회해보세요.
+mysangjo.or.kr 에서도 확인 가능해요."</div>
+  </div>
+  <div>
+    <span class="chip-info">관광사업자 2025-000004호</span>
+    <span class="chip-info">11년 운영</span>
+    <span class="chip-info">신한은행 직접 지급보증</span>
+    <span class="chip-info">공정거래위원회 등록</span>
+    <a class="link-chip secondary" href="http://mysangjo.or.kr" target="_blank">mysangjo.or.kr</a>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 10 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-10" data-phase="10">
+  <div class="phase-header">
+    <span class="phase-num">Phase 10</span>
+    <span class="phase-title">저항 처리</span>
+    <span class="phase-timer">⏱ 22~25분</span>
+    <span class="block-label block-3">BLOCK 3 — CLOSE</span>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">저항 처리 원칙</div>
+    <div class="script-text">"관심 없어요"는 끝이 아니다.
+고객의 생각과 감정을 가져와야 한다.
+단, 압박이 아닌 — 고객이 스스로 생각하고 감정을 꺼내도록 질문으로.</div>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">💍 배우자 반대 저항 — "남편이 안 된다고 해요"</div>
+    <div class="script-text">"아, 남편분이 처음엔 다 그러세요.
+사실 남편분 걱정은 딱 두 가지예요 — 돈 걱정, 사기 걱정.
+그런데 저희는 신한은행이 보관하고, 관광사업자 등록번호가 있어요.
+남편분이 직접 검색해보시면 돼요.
+
+선생님이 '나는 가고 싶어'라는 마음은 아직 있으시죠?"</div>
+    <div class="script-note">→ 배우자를 적으로 만들지 말 것. "남편 걱정 = 정보 부족"으로 프레임 전환</div>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">🏥 건강 이유 저항 — "몸이 안 좋아서요"</div>
+    <div class="script-text">"맞아요, 그래서 저희가 의료진 상담이랑 헬스케어 서비스가 있는 거예요.
+크루즈 자체가 — 비행기 이동이 없고, 배 안에서 주무시고,
+매일 다른 항구에 도착해요. 이동 피로가 거의 없어요.
+
+실제로 건강이 조금 안 좋으셔서 오히려 크루즈 선택하시는 분들 많아요.
+지금 어떤 부분이 걱정되세요?"</div>
+    <div class="script-note">→ 건강 저항 = 크루즈 장점으로 역전. 구체적 증상 파악 후 맞춤 대응</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">⏰ 타이밍 미루기 저항 — "좀 더 생각해볼게요"</div>
+    <div class="script-text">"물론이죠. 그런데 선생님, 딱 하나만 여쭤볼게요.
+지금 걸리시는 부분이 딱 뭐예요?
+정보가 더 필요하신 건지, 아니면 다른 이유가 있으신 건지."</div>
+    <div class="script-note">⏸ 5초 침묵 — 진짜 저항 꺼내기. "생각해볼게요" 뒤에는 반드시 진짜 이유가 있다</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">💰 가격 저항 — "비싸요 / 돈이 없어요"</div>
+    <div class="script-text">"맞아요, 처음엔 그렇게 느껴지죠.
+그런데 하루 1,100원이에요.
+커피 한 잔 값인데 — 항공, 크루즈, 식사, 보험, 베테랑 인솔팀, 전문 촬영까지 다요.
+따로 준비하시면 최소 200만원 이상이에요.
+
+선생님, 지금 당장 부담이신 건지, 아니면 이게 맞는 금액인지 모르시는 건지
+어느 쪽이세요?"</div>
+    <div class="script-note">→ "돈 없다" = 가치 미전달 신호. 가격을 비교 우위로 재프레임</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 11 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-11" data-phase="11">
+  <div class="phase-header">
+    <span class="phase-num">Phase 11</span>
+    <span class="phase-title">욕망 재형성</span>
+    <span class="phase-timer">⏱ 25~27분</span>
+    <span class="block-label block-3">BLOCK 3 — CLOSE</span>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">🔥 욕망 재점화 — 여행지 미러링</div>
+    <div class="script-text">"선생님, 아까 [고객이 말한 여행지] 가보고 싶다고 하셨잖아요.
+그 마음 지금도 있으시죠?"</div>
+    <div class="script-note">⏸ 4초 — 고객의 욕망 발화 대기. "네" 나오면 바로 5감각 타임머신 진입</div>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">🌊 5감각 타임머신 — 욕망 2회 확보용</div>
+    <div class="script-text">"잠깐, 다시 한번 같이 가볼게요.
+
+아침에 눈을 떴는데 창밖이 바다예요.
+배가 천천히 움직이고, 파도 소리가 들리고.
+짠 바람 냄새 — 창문 열면 바로 느껴지는 그 느낌.
+
+갑판에 나오면 수평선이 끝까지 펼쳐져 있고,
+커피 한 잔 들고 거기 서 계시는 선생님.
+
+그 순간이 그냥 눈에 그려지지 않으세요?"</div>
+    <div class="script-note">⏸ 4~5초 침묵 — 고객이 스스로 "너무 가고싶다" / "그거 진짜 좋겠다" 발화 대기 = 욕망 2회 ✓</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">인생샷 욕망 보조 (5감각 반응 약할 때)</div>
+    <div class="script-text">"전문 작가가 그 장면 찍어드리는 거예요.
+인생샷·영상 파일 — 평생 남는 거잖아요.
+어떻게 생각하세요?"</div>
+    <div class="script-note">→ "그거 너무 좋겠다" = 욕망 2회 확보 ✓ → GATE 7 체크 → 클로징 진입</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 12 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-12" data-phase="12">
+  <div class="phase-header">
+    <span class="phase-num">Phase 12</span>
+    <span class="phase-title">클로징 — GATE 7 + Assumptive Close</span>
+    <span class="phase-timer">⏱ 27~29분</span>
+    <span class="hot-badge">🎯 클로징</span>
+    <span class="block-label block-3">BLOCK 3 — CLOSE</span>
+  </div>
+  <div class="rp-section" style="margin:0 0 12px">
+    <div class="rp-title">GATE 7 체크리스트 (Assumptive Close 전)</div>
+    <ul class="gate-list">
+      <li>결정권자 본인인가?</li>
+      <li>재정 여유 확인됐는가?</li>
+      <li>핵심 저항 해소됐는가?</li>
+      <li>욕망 재점화됐는가?</li>
+      <li>상품 이해도 충분한가?</li>
+      <li>신뢰 충분히 쌓였는가?</li>
+      <li>고객이 먼저 구체적 질문을 했는가?</li>
+    </ul>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">🎯 Assumptive Close — 7초 침묵</div>
+    <div class="script-text">"자동이체 어느 은행 쓰세요?"</div>
+    <div class="script-note">⏸ 7초 침묵 — 절대 먼저 말하지 않는다. 이 침묵이 클로징이다</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">A플랜 클로징</div>
+    <div class="script-text">"A플랜으로 시작하시면 되고요,
+자동이체 계좌 알려주세요."</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 13 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-13" data-phase="13">
+  <div class="phase-header">
+    <span class="phase-num">Phase 13</span>
+    <span class="phase-title">가입 완주 (8단계 안내)</span>
+    <span class="phase-timer">⏱ 29~44분</span>
+    <span class="block-label block-3">BLOCK 3 — CLOSE</span>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">📋 가입 옵션 + 타임라인 (고객 선택 제시)</div>
+    <div class="script-text">"신청 방식이 두 가지예요.
+
+① 전자서명 (빠름): 오늘 바로 확인 가능 → 3일 내 가전 설치 시작
+② 종이서명 (2주 소요): 우편 왕복이라 시간이 걸려요
+
+전자서명이 훨씬 빠르니까 카카오로 먼저 링크 보내드릴게요.
+확인하시고 전자서명으로 진행하시면 돼요."</div>
+    <div class="script-note">→ 빠른 경로 제시 → 가전 설치 3일 타임라인 = 즉각적 기대감</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">가입 완주 발화</div>
+    <div class="script-text">"감사합니다 선생님.
+담당 매니저 [이름]이 직접 연락드릴게요.
+신한은행 준비금 보관 확인서도 카카오로 보내드릴게요."</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">불안 언어 치환</div>
+    <div class="script-text">계약서 → "신청서"
+서명 → "확인"
+가입비 → "월 납입금"
+해지 → "환불" (신한은행 보장)</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">중도 해지 안내 (고객이 물어볼 때 정확하게)</div>
+    <div class="script-text">"만기 전 해지하시면 그동안 납입하신 금액은 신한은행에서 돌려드려요.
+상조 부분은 납입금의 50%는 법적으로 보호받는 구조예요.
+저희가 갑자기 없어져도 신한은행이 보증하는 거라 안전해요.
+
+가전제품 받으신 후 해지하시면 위약금이 발생하니까
+가전 받으시기 전에 말씀해주세요."</div>
+    <div class="script-note">→ 불안 질문에 정확하게 답해야 신뢰 올라감. 숨기지 말 것</div>
+  </div>
+  <div style="margin-top:10px">
+    <a class="link-chip orange" href="http://leadz.kr/vvo" target="_blank">📋 가입 신청 링크</a>
+    <a class="link-chip secondary" href="https://cafe.naver.com/funhanshop2/33720" target="_blank">가입절차 안내</a>
+    <a class="link-chip secondary" href="https://open.kakao.com/o/plREDDUh" target="_blank">카카오 오픈채팅</a>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- PHASE 14 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-14" data-phase="14">
+  <div class="phase-header">
+    <span class="phase-num">Phase 14</span>
+    <span class="phase-title">사후강화 (취소 방지)</span>
+    <span class="phase-timer">⏱ 44~47분</span>
+    <span class="block-label block-3">BLOCK 3 — CLOSE</span>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">렌탈 박스 안내 (밝게)</div>
+    <div class="script-text">"렌탈 박스 절대 뜯지 마세요~" (밝게)</div>
+    <div class="script-note">→ 밝은 톤으로 — 주의 지시가 아닌 친근한 팁으로</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">자발 입소문 유도</div>
+    <div class="script-text">"선생님, 친구분이나 가족 중에
+크루즈 가고 싶어하시는 분 있으세요?
+같이 가시면 더 좋잖아요."</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">샘플 파일 전송 (취소 방지)</div>
+    <div class="script-text">"잠깐만요, 실제 다녀오신 분 사진·영상 파일
+카카오로 보내드릴게요.
+선생님도 이런 파일 받으시는 거예요."</div>
+    <div class="script-note">→ 클로징 후 취소 방지 효과</div>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">✈️ 사후 재방문 감정 관리 (귀국 후 48시간이 골든타임)</div>
+    <div class="script-text">귀국 당일 (감정 최고조):
+"선생님, 영상 편집 완료했어요! 확인해보세요 :)"
+→ 황홀감 최고조 시점 → 취소 의지 0%
+
+귀국 1주 후 (공유 욕구):
+"혹시 주변에 같이 다음 여행 가고 싶은 분 계세요?
+지중해 vs 알래스카 — 다음엔 어느 쪽 끌리세요?"
+
+귀국 1개월 후 (재구매 씨앗):
+"선생님, 이번 여행 어떠셨어요?
+다음 번엔 더 긴 일정으로 가시는 분들이 많아요."</div>
+    <div class="script-note">→ 귀국 후 48시간이 재신청 확률 최고조 — 이 시점을 놓치지 말 것</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- LOOP — 저항 처리 -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-loop" data-phase="loop">
+  <div class="phase-header">
+    <span class="phase-num">루프 1~10</span>
+    <span class="phase-title">이탈 방어 저항 처리</span>
+    <span class="phase-timer">⏱ 상황별</span>
+    <span class="block-label block-3">LOOP</span>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">루프 원칙</div>
+    <div class="script-text">쉽게 포기하지 않는다.
+고객의 생각과 감정을 가져와야 한다.
+1%의 확률도 벌어야 한다.
+단, 압박이 아닌 질문으로.</div>
+  </div>
+  <div class="script-card hot">
+    <div class="script-card-label">🔄 루프 1 — "관심 없어요" 초기 거절</div>
+    <div class="script-text">"아, 네. 혹시 크루즈 자체가 관심 없으신 건가요,
+아니면 지금 타이밍이 맞지 않으신 건가요?"</div>
+    <div class="script-note">⏸ 5초 — 거절 유형 파악. "타이밍" → 재콜 약속. "관심없음" → TYPE 감지 후 접근 변경</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">🔄 루프 2 — "생각해볼게요" 미결 저항</div>
+    <div class="script-text">"물론이죠. 어떤 부분에서 좀 더 생각이 필요하세요?
+정보가 부족하신 건지, 아니면 다른 이유가 있으신 건지 여쭤봐도 될까요?"</div>
+    <div class="script-note">⏸ 5초 — 진짜 이유 꺼내기. 이유 없으면 = 감정 부족 → Phase 11 재진입</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">🔄 루프 3 — "남편이랑 상의해봐야 해요"</div>
+    <div class="script-text">"남편분이 어떤 부분 걱정하실 것 같아요?
+그 부분을 제가 미리 설명해드릴게요.
+남편분 걱정은 보통 돈 문제랑 안전 문제인데요
+— 딱 두 가지만 말씀해드리면 돼요."</div>
+    <div class="script-note">→ 남편 반대 예상 저항 선제 처리. TYPE4 분기 준비</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">🔄 루프 4 — "나는 상조 같은 거 안 해요"</div>
+    <div class="script-text">"네, 완전히 맞는 말씀이에요.
+저희도 상조 아니에요.
+관광사업자 등록된 정식 여행 멤버십이고,
+신한은행이 준비금 보관하는 여행 서비스예요.
+상조는 장례 서비스잖아요. 저희는 여행이에요."</div>
+    <div class="script-note">→ TYPE1 확정. 흰 곰 효과 방지 — "상조" 단어 다시 쓰지 말 것</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">🔄 루프 5 — "타사랑 비교해볼게요"</div>
+    <div class="script-text">"어디랑 비교해보실 거예요?
+한 가지만 말씀드릴게요 —
+담당 매니저 1:1 전담, 10년차 인솔팀, 전문 사진·영상 파일 — 이 세 가지 있는 데가 있으면
+저도 거기 가시라고 할게요.
+지금까지 찾으신 곳이 있으세요?"</div>
+    <div class="script-note">→ 비교 유도 역전. "없죠"가 나오면 = 비교 우위 확정</div>
+  </div>
+  <div class="script-card">
+    <div class="script-card-label">⛔ 완전 철수 기준 (이 중 2개 이상 해당 시)</div>
+    <div class="script-text">□ "관심 없어요" 3회 이상 반복
+□ 목소리가 점점 낮아지고 단답형
+□ "저 나이에 이런 거 필요없어요"
+□ 배우자 반대 + 본인도 부정적
+□ 재정적 어려움 명확히 언급 3회 이상
+→ "편하신 시점에 제가 다시 연락드릴게요. 한 달 뒤쯤 어떠세요?"</div>
+    <div class="script-note">→ 무리한 압박은 클로징 확률 0% + 브랜드 신뢰 훼손. 정중한 철수가 맞다</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════ -->
+<!-- TYPE REFERENCE -->
+<!-- ═══════════════════════════════════════════ -->
+<section class="phase-section" id="phase-types" data-phase="types">
+  <div class="phase-header">
+    <span class="phase-num">TYPE 가이드</span>
+    <span class="phase-title">8가지 고객 유형 완전 레퍼런스</span>
+  </div>
+
+  <!-- TYPE1 -->
+  <div class="type-detail-section active" id="type-detail-1">
+    <div class="type-header">TYPE 1 — 상조연상 방어형</div>
+    <div class="type-kpi">클로징 목표: 당일 40%+ | 통화 시간: 15분</div>
+    <div class="type-rule">"상조" "렌탈" 단어 먼저 발화 절대 금지 — 흰 곰 효과<br>
+첫 1분에 프리미엄 이미지 선제 구축 (담당 매니저·베테랑팀·전문 촬영)<br>
+신뢰가 열리기 전에는 클로징 없다</div>
+    <div class="script-card" style="margin-top:8px">
+      <div class="script-card-label">황금 발화</div>
+      <div class="script-text">"이거 여행이에요. 크루즈 여행. 상조나 렌탈이랑 사업 자체가 달라요.
+담당 매니저 이름이 있고, 신한은행이 돈 보관하고,
+관광사업자 등록번호 검색되는 정식 여행 멤버십이에요."</div>
+    </div>
+    <div class="script-card">
+      <div class="script-card-label">"상조 아니에요?" 응대</div>
+      <div class="script-text">"크루즈닷은 관광사업자 등록된 정식 여행 멤버십이에요.
+관광사업자등록 2025-000004호예요.
+상조는 상조법인으로 등록하는 거고,
+저희는 여행사 등록이에요. 사업 자체가 달라요."</div>
+    </div>
+  </div>
+
+  <!-- TYPE2 -->
+  <div class="type-detail-section active" id="type-detail-2">
+    <div class="type-header">TYPE 2 — 논리형 ROI 계산기</div>
+    <div class="type-kpi">클로징 목표: 당일 40%+ | 통화 시간: 12분</div>
+    <div class="type-rule">단가가 아닌 가치를 보여줘라<br>담당 매니저 유일성이 클로징 카드<br>인솔팀 검증이 신뢰 완성</div>
+    <div class="script-card" style="margin-top:8px">
+      <div class="script-card-label">ETF 반박 황금 발화</div>
+      <div class="script-text">"ETF도 하시고 크루즈닷도 하시면 돼요.
+어차피 여행은 가실 거잖아요.
+저렴하게 + 베테랑팀 + 담당 매니저까지 붙는 게 훨씬 이득이에요."</div>
+    </div>
+    <div class="script-card">
+      <div class="script-card-label">패키지 분해 ROI</div>
+      <div class="script-text">타사에서 각각 구매하면:
+왕복 항공(일본) 30~50만원 + 크루즈 선실(4박) 60~120만원
++ 전문 사진작가 고용 30~50만원 + 전문 영상 50~100만원
+= 최소 170~320만원+
+
+크루즈닷 A플랜: 하루 1,100원 (월 33,000원)</div>
+    </div>
+  </div>
+
+  <!-- TYPE3 -->
+  <div class="type-detail-section active" id="type-detail-3">
+    <div class="type-header">TYPE 3 — HOT 결심형</div>
+    <div class="type-kpi">클로징 목표: 당일 70%+ | 통화 시간: 7분</div>
+    <div class="type-rule">속도가 클로징이다 — 7분 경로를 지켜라<br>흔들지 마라 — 이미 결심했다<br>선택지를 좁혀라</div>
+    <div class="script-card" style="margin-top:8px">
+      <div class="script-card-label">7분 빠른 경로</div>
+      <div class="script-text">0~1분: 확인 + 프리미엄 3가지 각인
+1~3분: A/B/C 플랜 30초 설명
+3~4분: "어느 게 편하세요?"
+4~6분: 자동이체 처리
+6~7분: 환영 + 담당 매니저 소개</div>
+    </div>
+    <div class="script-card">
+      <div class="script-card-label">HOT 오프닝</div>
+      <div class="script-text">"잘 선택하셨어요. 딱 3가지만 말씀드릴게요.
+담당 매니저 전담 케어, 10·11년차 베테랑 인솔팀,
+전문 사진·영상 파일 전달 — 이게 타사에 없는 거예요."</div>
+    </div>
+  </div>
+
+  <!-- TYPE4 -->
+  <div class="type-detail-section active" id="type-detail-4">
+    <div class="type-header">TYPE 4 — 핑퐁 남편방패형</div>
+    <div class="type-kpi">클로징 목표: 당일 35%+ / D+1 남편 합류 60%+</div>
+    <div class="type-rule">남편을 적으로 만들지 마라 — "남편도 같이 혜택 받는 사람"<br>담당 매니저가 남편 걱정을 해결한다<br>욕망 2회 확보 후 클로징</div>
+    <div class="script-card" style="margin-top:8px">
+      <div class="script-card-label">남편 전달용 황금 멘트</div>
+      <div class="script-text">"선생님, 남편분한테 이렇게 말씀해주세요:
+'담당 매니저가 있는 크루즈야. 사진·영상 파일 다 준대.
+하루 2,200원(부부 합산)인데 둘이 같이 가는 거야'"</div>
+    </div>
+  </div>
+
+  <!-- TYPE5 -->
+  <div class="type-detail-section active" id="type-detail-5">
+    <div class="type-header">TYPE 5 — 65세+ 의심형</div>
+    <div class="type-kpi">클로징 목표: 당일 25%+ / D+3 40%+</div>
+    <div class="type-rule">신뢰가 먼저, 상품은 나중<br>고객이 먼저 물어볼 때까지 기다려라<br>FOMO는 독약 — "오늘만", "빨리" 절대 금지</div>
+    <div class="script-card" style="margin-top:8px">
+      <div class="script-card-label">전화 역전 구조</div>
+      <div class="script-text">"선생님, 제가 먼저 공식 문자 보내드릴게요.
+크루즈닷 공식 번호로 오는 문자에
+제 이름이랑 사원번호가 써 있을 거예요.
+확인하시고 궁금한 게 있으시면 그때 저한테 다시 전화주셔도 돼요."</div>
+    </div>
+    <div class="script-card">
+      <div class="script-card-label">사기꾼과 구분 발화</div>
+      <div class="script-text">"사기꾼은 자기 이름을 안 가르쳐줘요.
+저는 이름이랑 번호 다 드려요."</div>
+    </div>
+  </div>
+
+  <!-- TYPE6 -->
+  <div class="type-detail-section active" id="type-detail-6">
+    <div class="type-header">TYPE 6 — 바쁜 남성</div>
+    <div class="type-kpi">클로징 목표: 당일 35%+ / 아내 합류 50%+</div>
+    <div class="type-rule">아내 프레임이 열쇠 — "사모님 선물"로 프레임<br>담당 매니저 = "선생님이 할 게 없어요"<br>30초 안에 승부</div>
+    <div class="script-card" style="margin-top:8px">
+      <div class="script-card-label">아내 프레임 오프닝</div>
+      <div class="script-text">"선생님, 2분만 시간 있으세요?
+사모님한테 크루즈 선물하는 방법 말씀드리려고요."</div>
+    </div>
+    <div class="script-card">
+      <div class="script-card-label">30초 임팩트</div>
+      <div class="script-text">"담당 매니저가 전부 처리해드려요.
+선생님이 아무것도 준비하실 게 없어요.
+전문 사진·영상 파일도 드리고, 하루 1,100원이에요.
+사모님이 엄청 좋아하실 거예요."</div>
+    </div>
+  </div>
+
+  <!-- TYPE7 -->
+  <div class="type-detail-section active" id="type-detail-7">
+    <div class="type-header">TYPE 7 — 감정형 죄책감</div>
+    <div class="type-kpi">클로징 목표: 당일 40%+ | 통화 시간: 15분</div>
+    <div class="type-rule">전문 촬영 파일 = "가족 선물" 프레임<br>"선생님 차례예요"가 마법 발화<br>욕망 2회 확보 후에만 클로징</div>
+    <div class="script-card" style="margin-top:8px">
+      <div class="script-card-label">자기허락 발화</div>
+      <div class="script-text">"선생님이 행복하면 가족이 다 행복해요.
+전문 촬영 파일은 가족 전체 선물이고요.
+나만 좋은 게 아니에요.
+이제 선생님 차례예요."</div>
+    </div>
+    <div class="script-card">
+      <div class="script-card-label">완전 철수 기준 (2가지 이상 해당 시)</div>
+      <div class="script-text">□ 반복적 "돈 없어요" 3회 이상
+□ 가족 부양 언급이 중심 저항
+□ "남편이 절대 안 된다고 해요"
+□ 목소리가 점점 낮아지고 단답형
+□ "저 나이에 이런 거 필요없어요"
+→ "편하신 시점에 제가 다시 연락드릴게요. 한 달 뒤쯤 어떠세요?"</div>
+    </div>
+  </div>
+
+  <!-- TYPE8 -->
+  <div class="type-detail-section active" id="type-detail-8">
+    <div class="type-header">TYPE 8 — 재콜 미결형</div>
+    <div class="type-kpi">D+1 클로징 목표: 40%+ / D+2 남편 합류 60%+</div>
+    <div class="type-rule">이전 저항을 먼저 파악하라<br>새 카드가 없으면 재콜 금지<br>D+1 목표: 클로징 OR 남편 합류 약속</div>
+    <div class="script-card" style="margin-top:8px">
+      <div class="script-card-label">재콜 오프닝</div>
+      <div class="script-text">"안녕하세요 선생님, 크루즈닷 [이름]이에요.
+지난번에 생각해보신다고 하셨는데,
+어떤 부분이 걸리셨어요?"</div>
+    </div>
+    <div class="script-card">
+      <div class="script-card-label">재콜 회차별 전략</div>
+      <div class="script-text">D+1: 저항 재파악 + 미투입 카드 1장
+D+2: 담당 매니저 실명 공개 (최강 카드)
+D+3: 전문 촬영 파일 카카오 전송
+D+4+: 완전 철수 → 6개월 후 재콜</div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /left-panel -->
+
+<!-- RIGHT PANEL -->
+<div id="right-panel">
+  <!-- Reaction tags + Rebuttals — dynamic by phase -->
+  <div id="reaction-panel">
+
+    <!-- Default: Phase 0 -->
+    <div class="rp-section" id="rp-reactions">
+      <div class="rp-title">고객 반응 태그</div>
+      <div id="reaction-tags-content">
+        <span class="reaction-tag tag-answer">네, 들을게요</span>
+        <span class="reaction-tag tag-neutral">누구세요?</span>
+        <span class="reaction-tag tag-resist">끊기 / 바빠요</span>
+        <span class="reaction-tag tag-neutral">카카오 사용해요</span>
+        <span class="reaction-tag tag-resist">어디서 번호를?</span>
+      </div>
+    </div>
+
+    <div class="rp-section" id="rp-rebuttals">
+      <div class="rp-title">즉시 반론 처리 카드</div>
+      <div id="rebuttal-content">
+
+        <div class="rebuttal-item">
+          <div class="rebuttal-trigger" onclick="toggleRebuttal(this)">
+            <span>"생각해볼게요"</span><span class="arrow">▼</span>
+          </div>
+          <div class="rebuttal-body">"어떤 부분이 제일 마음에 걸리세요?
+솔직하게 말씀해주시면 제가 바로 말씀드릴게요."
+⏸ 4초 침묵</div>
+        </div>
+
+        <div class="rebuttal-item">
+          <div class="rebuttal-trigger" onclick="toggleRebuttal(this)">
+            <span>"비싸요"</span><span class="arrow">▼</span>
+          </div>
+          <div class="rebuttal-body">"하루 1,100원인데요.
+커피 한 잔보다 싸요.
+항공+크루즈+숙박+식사+전문 사진·영상 파일까지 다 포함이에요.
+이보다 저렴한 옵션이 없어요."</div>
+        </div>
+
+        <div class="rebuttal-item">
+          <div class="rebuttal-trigger" onclick="toggleRebuttal(this)">
+            <span>"상조 아니에요?"</span><span class="arrow">▼</span>
+          </div>
+          <div class="rebuttal-body">"저희 여행사예요. 관광사업자 2025-000004호예요.
+상조는 상조법인으로 등록하는 거고,
+저희는 여행사 등록이에요. 사업 자체가 달라요."</div>
+        </div>
+
+        <div class="rebuttal-item">
+          <div class="rebuttal-trigger" onclick="toggleRebuttal(this)">
+            <span>"남편이랑 상의해야 해요"</span><span class="arrow">▼</span>
+          </div>
+          <div class="rebuttal-body">"당연하죠, 같이 가시는 거니까요.
+근데 이게 선생님 혼자가 아니라 남편분도 같이 크루즈 가시는 거예요.
+전문 작가가 부부 사진·영상도 다 찍어드리고요.
+남편분이 오히려 더 좋아하실 거예요.
+지금 남편분 옆에 계시면 잠깐 바꿔주실 수 있어요?"</div>
+        </div>
+
+        <div class="rebuttal-item">
+          <div class="rebuttal-trigger" onclick="toggleRebuttal(this)">
+            <span>"다단계 아니에요?"</span><span class="arrow">▼</span>
+          </div>
+          <div class="rebuttal-body">"법적으로 여행사는 다단계 등록 대상이 아니에요.
+저희는 관광사업자 등록된 정식 여행사예요."</div>
+        </div>
+
+        <div class="rebuttal-item">
+          <div class="rebuttal-trigger" onclick="toggleRebuttal(this)">
+            <span>"부정적인 글 봤어요"</span><span class="arrow">▼</span>
+          </div>
+          <div class="rebuttal-body">"어떤 글이에요? 크루즈닷 후기예요, 더좋은라이프 후기예요?
+저희 공식 후기는 네이버에 '크루즈닷'으로 검색하시면 나와요."</div>
+        </div>
+
+        <div class="rebuttal-item">
+          <div class="rebuttal-trigger" onclick="toggleRebuttal(this)">
+            <span>"ETF가 낫지 않나요?"</span><span class="arrow">▼</span>
+          </div>
+          <div class="rebuttal-body">"ETF는 10년 뒤. 저희는 지금 선생님을 위한 거예요.
+ETF도 하시면서 크루즈닷도 하시면 돼요.
+어차피 여행은 가실 거잖아요."</div>
+        </div>
+
+        <div class="rebuttal-item">
+          <div class="rebuttal-trigger" onclick="toggleRebuttal(this)">
+            <span>"나중에 할게요"</span><span class="arrow">▼</span>
+          </div>
+          <div class="rebuttal-body">"1년 뒤에도 지금 이 상태라면
+선생님 어떻게 되실 것 같아요?"
+⏸ 5초 침묵</div>
+        </div>
+
+        <div class="rebuttal-item">
+          <div class="rebuttal-trigger" onclick="toggleRebuttal(this)">
+            <span>"약관 보고 싶어요"</span><span class="arrow">▼</span>
+          </div>
+          <div class="rebuttal-body">"지금 문자로 보내드릴게요.
+보통 며칠이면 확인되세요?"</div>
+        </div>
+
+        <div class="rebuttal-item">
+          <div class="rebuttal-trigger" onclick="toggleRebuttal(this)">
+            <span>"21년이 너무 길어요"</span><span class="arrow">▼</span>
+          </div>
+          <div class="rebuttal-body">"여행은 1회 가시는 거고,
+월 적립이 21년이지만 5년 지나면 15,000원으로 줄어요."</div>
+        </div>
+
+        <div class="rebuttal-item">
+          <div class="rebuttal-trigger" onclick="toggleRebuttal(this)">
+            <span>"타사가 더 싸던데요"</span><span class="arrow">▼</span>
+          </div>
+          <div class="rebuttal-body">"타사는 베테랑 인솔자·가이드도 없고,
+사진·영상 파일도 없고, 담당 매니저도 없어요.
+비교 대상이 다른 거예요."</div>
+        </div>
+
+        <div class="rebuttal-item">
+          <div class="rebuttal-trigger" onclick="toggleRebuttal(this)">
+            <span>"돈 날리는 거 아니에요?"</span><span class="arrow">▼</span>
+          </div>
+          <div class="rebuttal-body">"여행 안 가시면 전액 환불이에요.
+신한은행 직접 지급보증이에요."</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- TYPE 즉시 대응 -->
+    <div class="rp-section">
+      <div class="rp-title">TYPE 즉시 대응표</div>
+      <div style="font-size:12px;line-height:1.9;color:#374151">
+        <b style="color:#DC2626">TYPE1</b> 상조의심 → "더좋은라이프" 봉인 + 신한은행만<br>
+        <b style="color:#2563EB">TYPE2</b> 논리ROI → 약관 즉시 전송 + ETF 비교 발화<br>
+        <b style="color:#D97706">TYPE3</b> HOT → 즉시 7분 경로 진입<br>
+        <b style="color:#7C3AED">TYPE4</b> 핑퐁 → 남편 공동 수혜자 프레임<br>
+        <b style="color:#0F766E">TYPE5</b> 65+의심 → 신뢰 먼저 + FOMO 절대 금지<br>
+        <b style="color:#1D4ED8">TYPE6</b> 바쁜남성 → "사모님 선물" 프레임 + 30초<br>
+        <b style="color:#BE185D">TYPE7</b> 죄책감 → "선생님 차례예요" + 가족 선물<br>
+        <b style="color:#065F46">TYPE8</b> 재콜 → 미투입 카드 1장만
+      </div>
+    </div>
+
+    <!-- 통화 타임라인 -->
+    <div class="rp-section">
+      <div class="rp-title">통화 타임라인</div>
+      <div style="font-size:11.5px;line-height:2;color:#475569">
+        <span style="color:var(--primary);font-weight:600">0~2분</span> Phase 0 신원확립<br>
+        <span style="color:var(--primary);font-weight:600">2~5분</span> Phase 1 니즈 파악<br>
+        <span style="color:var(--primary);font-weight:600">5~7분</span> Phase 2 니즈 증폭<br>
+        <span style="color:var(--primary);font-weight:600">7~10분</span> Phase 3 욕망<br>
+        <span style="color:var(--primary);font-weight:600">10~12분</span> Phase 4 럭셔리 400만원<br>
+        <span style="color:var(--primary);font-weight:600">12~14분</span> Phase 5~6 장벽<br>
+        <span style="color:var(--primary);font-weight:600">14~15분</span> Phase 7 허가서<br>
+        <span style="color:var(--primary);font-weight:600">15~17분</span> Phase 8 상품<br>
+        <span style="color:var(--primary);font-weight:600">17~19분</span> Phase 8.5 보너스<br>
+        <span style="color:var(--primary);font-weight:600">19~22분</span> Phase 9 신뢰<br>
+        <span style="color:var(--primary);font-weight:600">22~25분</span> Phase 10 저항<br>
+        <span style="color:var(--primary);font-weight:600">25~27분</span> Phase 11~12 클로징<br>
+        <span style="color:#D97706;font-weight:600">★ TYPE3 HOT:</span> 14분 → 즉시 클로징
+      </div>
+    </div>
+
+    <!-- 감정 이동 8단계 -->
+    <div class="rp-section">
+      <div class="rp-title">감정 이동 8단계</div>
+      <div class="emotion-steps">
+        <div class="emotion-step" data-n="①"><div><div class="emotion-step-title">정보</div><div class="emotion-step-desc">경계 해제 + 대화 허락</div></div></div>
+        <div class="emotion-step" data-n="②"><div><div class="emotion-step-title">여행 욕망</div><div class="emotion-step-desc">여행 이미지 스스로 그리게</div></div></div>
+        <div class="emotion-step" data-n="③"><div><div class="emotion-step-title">크루즈 호기심</div><div class="emotion-step-desc">나에게 가능한 것으로 인식</div></div></div>
+        <div class="emotion-step" data-n="④"><div><div class="emotion-step-title">럭셔리 욕망 ✓</div><div class="emotion-step-desc">"저 배 타보고 싶다" 발화</div></div></div>
+        <div class="emotion-step" data-n="⑤"><div><div class="emotion-step-title">문제 인식</div><div class="emotion-step-desc">고객 입으로 장벽 발화</div></div></div>
+        <div class="emotion-step" data-n="⑥"><div><div class="emotion-step-title">시사 인식</div><div class="emotion-step-desc">긴급성을 스스로 느끼게</div></div></div>
+        <div class="emotion-step" data-n="⑦"><div><div class="emotion-step-title">해결 요청 ✓</div><div class="emotion-step-desc">"방법이 있어요?" 발화 = 허가서</div></div></div>
+        <div class="emotion-step" data-n="⑧"><div><div class="emotion-step-title">상품 수용 ✓</div><div class="emotion-step-desc">"해볼 수 있겠는데요" 자발 발화</div></div></div>
+      </div>
+    </div>
+
+    <!-- 절대 금지 발화 -->
+    <div class="rp-section">
+      <div class="rp-title">절대 금지 발화</div>
+      <div style="font-size:12px;line-height:2;color:#DC2626">
+        ❌ "더좋은라이프" — TYPE1 앞에서<br>
+        ❌ "자리 없어질 수 있어요" — 희소성 압박<br>
+        ❌ "상조입니다" — 전체 금지<br>
+        ❌ "가입비예요" → "월 납입금"<br>
+        ❌ "계약서" → "신청서"<br>
+        ❌ "서명" → "확인"<br>
+        ❌ "50%만 보장" — 고객이 먼저 묻기 전<br>
+        ❌ "결정하셨어요?" 재콜 시
+      </div>
+    </div>
+
+  </div><!-- /reaction-panel -->
+</div><!-- /right-panel -->
+</div><!-- /content-row -->
+</div><!-- /main-area -->
+</div><!-- /app -->
+
+<!-- 검색 결과 모달 -->
+<div id="search-modal" onclick="if(event.target.id==='search-modal')closeSearchModal()">
+  <div id="search-modal-box">
+    <div id="search-modal-header">
+      <span id="search-modal-phase"></span>
+      <span id="search-modal-title"></span>
+      <button id="search-modal-close" onclick="closeSearchModal()">✕</button>
+    </div>
+    <div id="search-modal-body"></div>
+    <div id="search-modal-note"></div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────
+const PHASES = [
+  {id:'phase-0',   num:'0',   label:'오프닝 신원확립',    time:'0~2분',   hot:false, desc:'경계 해제 + 통화 허락 받기'},
+  {id:'phase-1',   num:'1',   label:'크루즈 니즈 파악',   time:'2~5분',   hot:false, desc:'고객 입으로 "가고 싶다" 말하게'},
+  {id:'phase-2',   num:'2',   label:'니즈 증폭',          time:'5~7분',   hot:false, desc:'질문으로 감정 욕망 키우기'},
+  {id:'phase-3',   num:'3',   label:'욕망 부풀리기',      time:'7~10분',  hot:true,  desc:'5감 이미지로 크루즈 체험시키기'},
+  {id:'phase-4',   num:'4',   label:'럭셔리 확대',        time:'10~12분', hot:false, desc:'400만원 앵커링으로 가치 극대화'},
+  {id:'phase-5',   num:'5',   label:'장벽 인식',          time:'12~14분', hot:false, desc:'고객 입으로 "돈이 문제" 말하게'},
+  {id:'phase-6',   num:'6',   label:'최악 시나리오',      time:'14~15분', hot:false, desc:'안 했을 때 후회를 직접 그리게'},
+  {id:'phase-7',   num:'7',   label:'허가서 발급',        time:'15분',    hot:true,  desc:'"해도 될 것 같아" 결론 내리게'},
+  {id:'phase-8',   num:'8',   label:'상품 안내',          time:'15~17분', hot:false, desc:'크루즈+골드바+플랜 구체 안내'},
+  {id:'phase-8-5', num:'8.5', label:'보너스 등장',        time:'17~19분', hot:true,  desc:'렌탈/상조를 예상치 못한 선물로'},
+  {id:'phase-9',   num:'9',   label:'Three 10s 신뢰',     time:'19~22분', hot:false, desc:'3가지 신뢰 앵커로 결제 장벽 허물기'},
+  {id:'phase-10',  num:'10',  label:'저항 처리',          time:'22~25분', hot:false, desc:'이의제기 공감→확인→전환으로 흡수'},
+  {id:'phase-11',  num:'11',  label:'욕망 재형성',        time:'25~27분', hot:true,  desc:'저항 후 감정 욕망으로 재복귀'},
+  {id:'phase-12',  num:'12',  label:'클로징',             time:'27~29분', hot:true,  desc:'자연스러운 클로징 + 2플랜 앵커링'},
+  {id:'phase-13',  num:'13',  label:'가입 완주',          time:'29~44분', hot:false, desc:'전자청약 + 본인인증 완주'},
+  {id:'phase-14',  num:'14',  label:'사후강화',           time:'44~47분', hot:false, desc:'박스 개봉 금지 + 취소 방어'},
+  {id:'phase-loop',num:'↺',  label:'루프 저항 처리',     time:'상황별',  hot:false, desc:'반복 저항 유형별 맞춤 대응'},
+  {id:'phase-types',num:'★', label:'TYPE 가이드',        time:'',        hot:false, desc:'고객 유형 8가지 맞춤 전략'},
+];
+
+const TYPES = [
+  {id:1, label:'TYPE1 상조혐오'},
+  {id:2, label:'TYPE2 논리ROI'},
+  {id:3, label:'TYPE3 HOT'},
+  {id:4, label:'TYPE4 핑퐁'},
+  {id:5, label:'TYPE5 건강불안'},
+  {id:6, label:'TYPE6 바쁜남성'},
+  {id:7, label:'TYPE7 죄책감'},
+  {id:8, label:'TYPE8 재콜'},
+];
+
+const KEYWORDS = ['상조','렌탈','클로징','욕망','신한은행','담당매니저','관광사업자',
+  'A플랜','B플랜','C플랜','SPIN','저항','환불','크루즈','일본','홍콩','동남아',
+  '전문작가','인솔자','더좋은라이프','하루1100원','흰곰','허가서','Assumptive',
+  '재콜','핑퐁','자기허락','욕망2회','400만원','GATE7'];
+
+// ─── BUILD SIDEBAR ───────────────────────────────
+function buildNav() {
+  const nav = document.getElementById('phase-nav');
+  PHASES.forEach((p, i) => {
+    const div = document.createElement('div');
+    div.className = 'phase-nav-item' + (i === 0 ? ' active' : '');
+    div.dataset.target = p.id;
+    div.innerHTML = `<span class="phase-badge">P${p.num}</span><span class="phase-nav-text"><span class="phase-nav-label">${p.label}</span>${p.desc ? `<span class="phase-nav-desc">→ ${p.desc}</span>` : ''}</span>${p.hot ? '<span class="hot-dot"></span>' : ''}`;
+    div.addEventListener('click', () => navigateTo(p.id, div));
+    nav.appendChild(div);
+  });
+}
+
+function buildTypeFilter() {
+  const wrap = document.getElementById('type-filter-wrap');
+  TYPES.forEach(t => {
+    const btn = document.createElement('div');
+    btn.className = 'type-btn';
+    btn.textContent = t.label;
+    btn.dataset.type = t.id;
+    btn.addEventListener('click', () => {
+      btn.classList.toggle('active');
+      filterByType();
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+// ─── NAVIGATION ──────────────────────────────────
+let currentPhaseId = 'phase-0';
+
+function navigateTo(phaseId, navEl) {
+  // Hide all, show target
+  document.querySelectorAll('.phase-section').forEach(s => s.classList.remove('visible'));
+  const target = document.getElementById(phaseId);
+  if (target) {
+    target.classList.add('visible');
+    target.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  // Update nav active
+  document.querySelectorAll('.phase-nav-item').forEach(n => n.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  else {
+    const found = document.querySelector(`.phase-nav-item[data-target="${phaseId}"]`);
+    if (found) found.classList.add('active');
+  }
+  currentPhaseId = phaseId;
+  updateProgress(phaseId);
+  updateReactionPanel(phaseId);
+}
+
+function updateProgress(phaseId) {
+  const phaseNums = PHASES.map(p => p.id);
+  const idx = phaseNums.indexOf(phaseId);
+  const pct = idx < 0 ? 0 : Math.round((idx / (PHASES.length - 1)) * 100);
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+function showAll() {
+  document.querySelectorAll('.phase-section').forEach(s => s.classList.add('visible'));
+  document.getElementById('search-count').textContent = '';
+}
+
+// ─── REACTION PANEL CONTEXT ──────────────────────
+const REACTION_DATA = {
+  'phase-0': {
+    tags: [
+      {cls:'tag-answer', text:'네, 들을게요'},
+      {cls:'tag-neutral', text:'누구세요?'},
+      {cls:'tag-resist', text:'끊기 / 바빠요'},
+      {cls:'tag-neutral', text:'카카오 사용해요'},
+      {cls:'tag-resist', text:'어디서 번호를?'},
+    ]
+  },
+  'phase-1': {
+    tags: [
+      {cls:'tag-answer', text:'없어요'},
+      {cls:'tag-answer', text:'가보고 싶었는데요'},
+      {cls:'tag-resist', text:'상조 아니에요?'},
+      {cls:'tag-neutral', text:'어떻게 다른 건데요?'},
+    ]
+  },
+  'phase-2': {
+    tags: [
+      {cls:'tag-answer', text:'비용이 부담이었어요'},
+      {cls:'tag-answer', text:'시간이 없었어요'},
+      {cls:'tag-neutral', text:'복잡할 것 같아서요'},
+      {cls:'tag-neutral', text:'혼자 가기 뭐해서요'},
+    ]
+  },
+  'phase-3': {
+    tags: [
+      {cls:'tag-answer', text:'너무 좋겠다 ✓욕망1회'},
+      {cls:'tag-answer', text:'가고싶다 ✓욕망1회'},
+      {cls:'tag-neutral', text:'일본 가보고 싶어요'},
+      {cls:'tag-neutral', text:'크루즈가 어떤 건지...'},
+    ]
+  },
+  'phase-4': {
+    tags: [
+      {cls:'tag-price', text:'400만원이요?'},
+      {cls:'tag-neutral', text:'럭셔리하게 한 번은...'},
+      {cls:'tag-resist', text:'너무 비싸네요'},
+      {cls:'tag-answer', text:'그 정도 할 것 같아요'},
+    ]
+  },
+  'phase-5': {
+    tags: [
+      {cls:'tag-answer', text:'비용이 걸렸어요'},
+      {cls:'tag-answer', text:'같이 갈 사람이 없어서'},
+      {cls:'tag-neutral', text:'준비가 복잡해서요'},
+      {cls:'tag-neutral', text:'없어요 (장벽 없음 ✓)'},
+    ]
+  },
+  'phase-7': {
+    tags: [
+      {cls:'tag-answer', text:'방법이 있어요? ✓허가서'},
+      {cls:'tag-answer', text:'어떻게 하면 돼요? ✓허가서'},
+      {cls:'tag-neutral', text:'그러면 좋겠는데요'},
+      {cls:'tag-neutral', text:'그게 가능해요?'},
+    ]
+  },
+  'phase-8': {
+    tags: [
+      {cls:'tag-price', text:'얼마예요?'},
+      {cls:'tag-answer', text:'A플랜으로 할게요 ✓클로징'},
+      {cls:'tag-neutral', text:'A/B 중 어느 게 나을까요?'},
+      {cls:'tag-resist', text:'21년이 너무 길어요'},
+    ]
+  },
+  'phase-12': {
+    tags: [
+      {cls:'tag-answer', text:'[은행명] 써요 ✓클로징'},
+      {cls:'tag-resist', text:'좀 더 생각해볼게요'},
+      {cls:'tag-neutral', text:'[7초 침묵 대기]'},
+    ]
+  },
+  'phase-loop': {
+    tags: [
+      {cls:'tag-resist', text:'생각해볼게요'},
+      {cls:'tag-resist', text:'비싸요'},
+      {cls:'tag-resist', text:'남편이랑 상의해야 해요'},
+      {cls:'tag-resist', text:'상조 아니에요?'},
+      {cls:'tag-resist', text:'다단계 아니에요?'},
+      {cls:'tag-resist', text:'나중에 할게요'},
+      {cls:'tag-price', text:'ETF가 낫지 않나요?'},
+    ]
+  }
+};
+
+function updateReactionPanel(phaseId) {
+  const data = REACTION_DATA[phaseId];
+  if (!data) return;
+  const tagsEl = document.getElementById('reaction-tags-content');
+  tagsEl.innerHTML = data.tags.map(t =>
+    `<span class="reaction-tag ${t.cls}">${t.text}</span>`
+  ).join('');
+}
+
+// ─── TYPE FILTER ─────────────────────────────────
+function filterByType() {
+  const active = [...document.querySelectorAll('.type-btn.active')].map(b => b.dataset.type);
+  if (active.length === 0) {
+    document.querySelectorAll('.phase-section').forEach(s => {
+      // restore to current single-phase view
+    });
+    return;
+  }
+  // Show types phase
+  navigateTo('phase-types', null);
+  // Hide/show type details
+  document.querySelectorAll('.type-detail-section').forEach(t => {
+    const typeNum = t.id.replace('type-detail-', '');
+    t.style.display = active.includes(typeNum) || active.length === 0 ? 'block' : 'none';
+  });
+}
+
+// ─── REBUTTAL TOGGLE ─────────────────────────────
+function toggleRebuttal(el) {
+  const body = el.nextElementSibling;
+  const arrow = el.querySelector('.arrow');
+  body.classList.toggle('open');
+  arrow.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+// ─── SEARCH ──────────────────────────────────────
+const searchInput = document.getElementById('search-input');
+const autocompleteBox = document.getElementById('autocomplete-box');
+const searchCount = document.getElementById('search-count');
+const clearBtn = document.getElementById('search-clear');
+
+let searchTimer;
+
+searchInput.addEventListener('input', function() {
+  clearTimeout(searchTimer);
+  const q = this.value.trim();
+  clearBtn.style.display = q ? 'block' : 'none';
+  if (!q) {
+    autocompleteBox.style.display = 'none';
+    removeHighlights();
+    searchCount.textContent = '';
+    return;
+  }
+  showAutocomplete(q);
+  searchTimer = setTimeout(() => doSearch(q), 300);
+});
+
+searchInput.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { clearSearch(); closeSearchModal(); }
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closeSearchModal();
+});
+
+function showAutocomplete(q) {
+  const ql = q.toLowerCase();
+  let html = '';
+
+  // ① 키워드 자동완성
+  const kwMatches = KEYWORDS.filter(k => k.toLowerCase().includes(ql)).slice(0, 5);
+  if (kwMatches.length) {
+    html += `<div class="ac-section-title">🔤 연관 키워드</div>`;
+    html += kwMatches.map(m =>
+      `<li onclick="selectAutocomplete('${m}')">${m}</li>`
+    ).join('');
+  }
+
+  // ② 실제 블럭 검색 결과
+  const blockResults = [];
+  document.querySelectorAll('.phase-section').forEach(phase => {
+    const phaseId = phase.id;
+    const phaseData = PHASES.find(p => p.id === phaseId);
+    const phaseLabel = phaseData ? `P${phaseData.num} ${phaseData.label}` : phaseId;
+    phase.querySelectorAll('.script-card').forEach(card => {
+      const labelEl = card.querySelector('.script-card-label');
+      const textEl  = card.querySelector('.script-text');
+      const noteEl  = card.querySelector('.script-note');
+      const labelTxt = labelEl ? labelEl.textContent : '';
+      const bodyTxt  = textEl  ? textEl.textContent  : '';
+      if ((labelTxt + bodyTxt).toLowerCase().includes(ql)) {
+        blockResults.push({phaseLabel, labelTxt, bodyTxt, noteTxt: noteEl ? noteEl.textContent : '', phaseId});
+      }
+    });
+  });
+
+  if (blockResults.length) {
+    html += `<div class="ac-section-title">📋 스크립트 블럭 (${blockResults.length}건)</div>`;
+    html += blockResults.slice(0, 10).map((r, i) => {
+      const preview = r.bodyTxt.replace(/\n/g,' ').slice(0, 80) + (r.bodyTxt.length > 80 ? '…' : '');
+      const safeLabel = r.labelTxt.replace(/'/g,'&#39;');
+      const safeBody  = r.bodyTxt.replace(/`/g,'\\`').replace(/\\/g,'\\\\');
+      const safeNote  = r.noteTxt.replace(/`/g,'\\`');
+      const safePhase = r.phaseLabel.replace(/'/g,'&#39;');
+      return `<div class="ac-block-item" onclick="openSearchModal('${safePhase}','${safeLabel}',\`${safeBody}\`,\`${safeNote}\`,'${r.phaseId}')">
+        <div class="ac-block-header">
+          <span class="ac-phase-tag">${r.phaseLabel}</span>
+          <span class="ac-block-label">${r.labelTxt || '스크립트'}</span>
+        </div>
+        <div class="ac-block-preview">${preview}</div>
+      </div>`;
+    }).join('');
+  }
+
+  if (!html) { autocompleteBox.style.display = 'none'; return; }
+  autocompleteBox.innerHTML = html;
+  autocompleteBox.style.display = 'block';
+}
+
+function selectAutocomplete(kw) {
+  searchInput.value = kw;
+  autocompleteBox.style.display = 'none';
+  doSearch(kw);
+}
+
+function openSearchModal(phaseLabel, title, body, note, phaseId) {
+  autocompleteBox.style.display = 'none';
+  document.getElementById('search-modal-phase').textContent  = phaseLabel;
+  document.getElementById('search-modal-title').textContent  = title || '스크립트';
+  document.getElementById('search-modal-body').textContent   = body;
+  const noteEl = document.getElementById('search-modal-note');
+  noteEl.textContent = note || '';
+  noteEl.style.display = note ? 'block' : 'none';
+  document.getElementById('search-modal').classList.add('open');
+}
+
+function closeSearchModal() {
+  document.getElementById('search-modal').classList.remove('open');
+}
+
+function doSearch(q) {
+  if (!q) return;
+  // Show all sections for search
+  document.querySelectorAll('.phase-section').forEach(s => s.classList.add('visible'));
+  removeHighlights();
+  const regex = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+  let count = 0;
+  document.querySelectorAll('.script-text, .script-card-label, .type-rule, .rebuttal-body, .rp-section').forEach(el => {
+    if (el.querySelector('table,ul,ol')) return;
+    const text = el.innerHTML;
+    const replaced = text.replace(regex, m => { count++; return `<mark class="hl">${m}</mark>`; });
+    if (replaced !== text) el.innerHTML = replaced;
+  });
+  searchCount.textContent = count > 0 ? `${count}건 발견` : '결과 없음';
+  // Scroll to first highlight
+  const first = document.querySelector('.hl');
+  if (first) first.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function removeHighlights() {
+  document.querySelectorAll('.hl').forEach(el => {
+    el.replaceWith(document.createTextNode(el.textContent));
+  });
+  // Normalize text nodes
+  document.querySelectorAll('.script-text, .script-card-label, .type-rule, .rebuttal-body').forEach(el => el.normalize());
+}
+
+function clearSearch() {
+  searchInput.value = '';
+  clearBtn.style.display = 'none';
+  autocompleteBox.style.display = 'none';
+  searchCount.textContent = '';
+  removeHighlights();
+  // Return to single-phase view
+  navigateTo(currentPhaseId, null);
+}
+
+// Close autocomplete on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('#search-wrap')) autocompleteBox.style.display = 'none';
+});
+
+// ─── KEYBOARD SHORTCUTS ──────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (e.target === searchInput) return;
+  const ids = PHASES.map(p => p.id);
+  const idx = ids.indexOf(currentPhaseId);
+  if (e.key === 'ArrowRight' && idx < ids.length - 1) {
+    navigateTo(ids[idx + 1], null);
+  } else if (e.key === 'ArrowLeft' && idx > 0) {
+    navigateTo(ids[idx - 1], null);
+  }
+});
+
+// ─── BLOCK CRUD ───────────────────────────────────
+const BLOCK_PW = '0313';
+let _editTarget = null; // 현재 수정 중인 block-wrap element
+
+function initBlockControls() {
+  // 1) 모달 삽입
+  if (!document.getElementById('block-modal')) {
+    document.body.insertAdjacentHTML('beforeend', `
+<div id="block-modal">
+  <div id="block-modal-box">
+    <div id="block-modal-title">✎ 블럭 수정</div>
+    <input id="block-modal-label" type="text" placeholder="블럭 제목 (예: A형 오프닝 — 가치 선행형)">
+    <textarea id="block-modal-content" placeholder="스크립트 내용을 입력하세요..."></textarea>
+    <input id="block-modal-note" type="text" placeholder="하단 메모 (선택)">
+    <input id="block-modal-author" type="text" placeholder="✏️ 수정한 사람 이름 (필수 — 미입력 시 저장 불가)">
+    <div class="modal-row">
+      <button class="modal-btn modal-btn-save" onclick="saveBlock()">저장</button>
+      <button class="modal-btn modal-btn-cancel" onclick="closeBlockModal()">취소</button>
+    </div>
+  </div>
+</div>`);
+  }
+
+  // 2) 모든 script-card / principle-box / wait-card에 컨트롤 추가
+  document.querySelectorAll('.phase-section').forEach(phase => {
+    const cards = phase.querySelectorAll('.script-card, .principle-box, .wait-card');
+    cards.forEach(card => {
+      if (card.parentElement.classList.contains('block-wrap')) return; // 이미 처리됨
+      const wrap = document.createElement('div');
+      wrap.className = 'block-wrap';
+      card.parentNode.insertBefore(wrap, card);
+      wrap.appendChild(card);
+      wrap.insertAdjacentHTML('beforeend', `<div class="block-ctrl">
+        <button class="btn-pin" onclick="pinBlock(this)" title="상위고정">📌</button>
+        <button onclick="editBlock(this)" title="수정">✎</button>
+        <button class="btn-del" onclick="deleteBlock(this)" title="삭제">🗑</button>
+      </div>`);
+    });
+
+    // 3) 각 Phase 하단에 "블럭 추가" 버튼
+    if (!phase.querySelector('.add-block-btn')) {
+      const addBtn = document.createElement('button');
+      addBtn.className = 'add-block-btn';
+      addBtn.innerHTML = '＋ 블럭 추가';
+      addBtn.addEventListener('click', () => addBlock(phase));
+      phase.appendChild(addBtn);
+    }
+  });
+}
+
+function pinBlock(btn) {
+  const wrap = btn.closest('.block-wrap');
+  const phase = wrap.closest('.phase-section');
+  const isAlreadyPinned = wrap.classList.contains('pinned-block');
+  if (isAlreadyPinned) {
+    wrap.classList.remove('pinned-block');
+    const lbl = wrap.querySelector('.pinned-label');
+    if (lbl) lbl.remove();
+    btn.title = '상위고정';
+    return;
+  }
+  // 상위로 이동 (phase-header 바로 다음)
+  const header = phase.querySelector('.phase-header');
+  if (header && header.nextSibling) {
+    phase.insertBefore(wrap, header.nextSibling);
+  } else {
+    phase.prepend(wrap);
+  }
+  wrap.classList.add('pinned-block');
+  const card = wrap.querySelector('.script-card,.principle-box,.wait-card');
+  if (card && !wrap.querySelector('.pinned-label')) {
+    card.insertAdjacentHTML('afterbegin', '<div class="pinned-label">📌 상위고정</div>');
+  }
+}
+
+function editBlock(btn) {
+  const wrap = btn.closest('.block-wrap');
+  const card = wrap.querySelector('.script-card,.principle-box,.wait-card');
+  _editTarget = wrap;
+  const labelEl = card.querySelector('.script-card-label,.rp-title');
+  const textEl  = card.querySelector('.script-text,.type-rule');
+  const noteEl  = card.querySelector('.script-note');
+  document.getElementById('block-modal-label').value   = labelEl ? labelEl.textContent.trim() : '';
+  document.getElementById('block-modal-content').value = textEl  ? textEl.textContent.trim()  : card.innerText.trim();
+  document.getElementById('block-modal-note').value    = noteEl  ? noteEl.textContent.trim()  : '';
+  document.getElementById('block-modal').classList.add('open');
+}
+
+function saveBlock() {
+  if (!_editTarget) return;
+  const authorEl = document.getElementById('block-modal-author');
+  const author = authorEl.value.trim();
+  if (!author) {
+    authorEl.classList.add('error');
+    authorEl.focus();
+    setTimeout(() => authorEl.classList.remove('error'), 400);
+    return;
+  }
+  const card = _editTarget.querySelector('.script-card,.principle-box,.wait-card');
+  const newLabel   = document.getElementById('block-modal-label').value.trim();
+  const newContent = document.getElementById('block-modal-content').value.trim();
+  const newNote    = document.getElementById('block-modal-note').value.trim();
+  if (card.classList.contains('script-card')) {
+    const lbl = card.querySelector('.script-card-label');
+    const txt = card.querySelector('.script-text');
+    const nt  = card.querySelector('.script-note');
+    if (lbl) lbl.textContent = newLabel;
+    if (txt) txt.textContent = newContent;
+    if (newNote) {
+      if (nt) nt.textContent = newNote;
+      else card.insertAdjacentHTML('beforeend', `<div class="script-note">${newNote}</div>`);
+    } else if (nt) nt.remove();
+  } else {
+    if (!newLabel) card.innerHTML = newContent;
+    else card.innerHTML = `<b>${newLabel}</b><br>${newContent}`;
+  }
+  _applyModifier(_editTarget, author);
+  closeBlockModal();
+}
+
+function closeBlockModal() {
+  document.getElementById('block-modal').classList.remove('open');
+  document.getElementById('block-modal-author').value = '';
+  _editTarget = null;
+}
+
+function deleteBlock(btn) {
+  const pw = prompt('삭제하려면 비밀번호를 입력하세요:');
+  if (pw === null) return;
+  if (pw !== BLOCK_PW) { alert('비밀번호가 틀렸습니다.'); return; }
+  const wrap = btn.closest('.block-wrap');
+  if (confirm('이 블럭을 삭제할까요? 되돌릴 수 없어요.')) {
+    wrap.remove();
+  }
+}
+
+function addBlock(phase) {
+  _editTarget = null;
+  document.getElementById('block-modal-title').textContent = '＋ 새 블럭 추가';
+  document.getElementById('block-modal-label').value   = '';
+  document.getElementById('block-modal-content').value = '';
+  document.getElementById('block-modal-note').value    = '';
+  // 저장 시 어느 Phase에 추가할지 기록
+  document.getElementById('block-modal').dataset.targetPhase = phase.id;
+  document.getElementById('block-modal').classList.add('open');
+  // 저장 버튼을 addSave로 교체
+  const saveBtn = document.querySelector('.modal-btn-save');
+  saveBtn.textContent = '추가';
+  saveBtn.onclick = () => addSaveBlock(phase);
+}
+
+function addSaveBlock(phase) {
+  const authorEl = document.getElementById('block-modal-author');
+  const author = authorEl.value.trim();
+  if (!author) {
+    authorEl.classList.add('error');
+    authorEl.focus();
+    setTimeout(() => authorEl.classList.remove('error'), 400);
+    return;
+  }
+  const lbl     = document.getElementById('block-modal-label').value.trim();
+  const content = document.getElementById('block-modal-content').value.trim();
+  const note    = document.getElementById('block-modal-note').value.trim();
+  if (!content) { alert('내용을 입력하세요.'); return; }
+  const wrap = document.createElement('div');
+  wrap.className = 'block-wrap';
+  wrap.innerHTML = `<div class="script-card">
+    ${lbl ? `<div class="script-card-label">${lbl}</div>` : ''}
+    <div class="script-text">${content}</div>
+    ${note ? `<div class="script-note">${note}</div>` : ''}
+  </div>
+  <div class="block-ctrl">
+    <button class="btn-pin" onclick="pinBlock(this)" title="상위고정">📌</button>
+    <button onclick="editBlock(this)" title="수정">✎</button>
+    <button class="btn-del" onclick="deleteBlock(this)" title="삭제">🗑</button>
+  </div>`;
+  const addBtn = phase.querySelector('.add-block-btn');
+  phase.insertBefore(wrap, addBtn);
+  _applyModifier(wrap, author);
+  // 저장 버튼 복원
+  const saveBtn = document.querySelector('.modal-btn-save');
+  saveBtn.textContent = '저장';
+  saveBtn.onclick = saveBlock;
+  closeBlockModal();
+  document.getElementById('block-modal-title').textContent = '✎ 블럭 수정';
+}
+
+function _applyModifier(wrap, author) {
+  const now = new Date();
+  const ts = `${now.getMonth()+1}/${now.getDate()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+  // 기존 수정자 태그 제거
+  wrap.querySelectorAll('.block-modifier').forEach(el => el.remove());
+  // 제목 옆에 삽입
+  const labelEl = wrap.querySelector('.script-card-label');
+  if (labelEl) {
+    labelEl.style.display = 'flex';
+    labelEl.style.alignItems = 'center';
+    labelEl.style.gap = '8px';
+    labelEl.insertAdjacentHTML('beforeend',
+      `<span class="block-modifier">✏️ <span class="mod-name">${author}</span><span class="mod-time">${ts}</span></span>`);
+  } else {
+    // principle-box 등 label 없는 경우 상단에
+    wrap.querySelector('.script-card,.principle-box,.wait-card')
+      ?.insertAdjacentHTML('afterbegin',
+        `<div class="block-modifier" style="margin-bottom:6px">✏️ <span class="mod-name">${author}</span><span class="mod-time">${ts}</span></div>`);
+  }
+}
+
+// ─── PHASE 본질 배너 주입 ──────────────────────────
+function injectPhaseEssence() {
+  PHASES.forEach(p => {
+    if (!p.desc) return;
+    const section = document.getElementById(p.id);
+    if (!section) return;
+    // 이미 있으면 건너뜀
+    if (section.querySelector('.phase-essence')) return;
+    const header = section.querySelector('.phase-header');
+    if (!header) return;
+    const banner = document.createElement('div');
+    banner.className = 'phase-essence';
+    banner.innerHTML = `<span class="ess-arrow">→</span><span class="ess-text">${p.desc}</span>`;
+    header.insertAdjacentElement('afterend', banner);
+  });
+}
+
+// ─── INIT ─────────────────────────────────────────
+buildNav();
+buildTypeFilter();
+updateProgress('phase-0');
+injectPhaseEssence();
+initBlockControls();
+// 모달 바깥 클릭 시 닫기 (initBlockControls 후)
+document.getElementById('block-modal').addEventListener('click', e => {
+  if (e.target.id === 'block-modal') closeBlockModal();
+});
+</script>
+</body>
+</html>
