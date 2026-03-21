@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>크루즈닷 상담 링크 도구</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#F8F9FA; --card:#FFFFFF; --primary:#2563EB; --navy:#1E3A5F;
+  --agent-bg:#F8FAFF; --hot-bg:#FFF7ED; --hot-border:#C2410C;
+  --border:#E2E8F0; --shadow:0 1px 4px rgba(0,0,0,.08);
+  --shadow-md:0 2px 12px rgba(0,0,0,.12); --radius:10px; --sidebar-w:220px;
+  --tag-price-bg:#FEF3C7; --tag-price-text:#92400E;
+  --tag-resist-bg:#FEE2E2; --tag-resist-text:#991B1B;
+  --tag-answer-bg:#D1FAE5; --tag-answer-text:#065F46;
+  --tag-neutral-bg:#EDE9FE; --tag-neutral-text:#5B21B6;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Noto Sans KR', 'Segoe UI', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+  background: var(--bg);
+  color: #1E293B;
+  font-size: 14px;
+  line-height: 1.65;
+  padding-top: 0;
+}
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* ── Top Header ── */
+#top-header {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  height: 52px;
+  background: #fff;
+  border-bottom: 2px solid var(--border);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+}
+
+.logo {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--navy);
+  white-space: nowrap;
+  margin-right: 4px;
+}
+
+/* ── Nav Tab Bar ── */
+.nav-tab-bar {
+  display: flex;
+  gap: 4px;
+}
+
+.nav-tab {
+  padding: 6px 16px;
+  border: none;
+  background: transparent;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #64748B;
+  transition: .2s;
+  font-family: inherit;
+}
+.nav-tab.active {
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+}
+.nav-tab:hover:not(.active) {
+  background: #F0F4FF;
+  color: var(--primary);
+}
+
+/* ── Header Buttons ── */
+.header-btns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.btn-sm {
+  padding: 6px 12px;
+  border: 1.5px solid #CBD5E1;
+  background: #fff;
+  border-radius: 20px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: .2s;
+  color: #374151;
+  white-space: nowrap;
+}
+.btn-sm:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+.btn-green {
+  background: #dcfce7;
+  color: #166534;
+  border-color: #86efac;
+}
+.btn-green:hover {
+  background: #16a34a;
+  color: #fff;
+  border-color: #16a34a;
+}
+.btn-blue {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+.btn-blue:hover {
+  background: var(--primary);
+  color: #fff;
+}
+.btn-orange {
+  background: #ffedd5;
+  color: #9a3412;
+  border-color: #fdba74;
+}
+.btn-orange:hover {
+  background: #ea580c;
+  color: #fff;
+  border-color: #ea580c;
+}
+.btn-purple {
+  background: #ede9fe;
+  color: #5b21b6;
+  border-color: #c4b5fd;
+}
+.btn-purple:hover {
+  background: #7c3aed;
+  color: #fff;
+  border-color: #7c3aed;
+}
+
+/* ── Panel Overlay ── */
+.panel-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: #fff;
+  overflow-y: auto;
+  display: none;
+}
+
+/* ── Section Visibility ── */
+#section-linktool {
+  display: block;
+  padding: 16px 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+#section-script {
+  display: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* ── Section Heading ── */
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 24px 0 14px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--border);
+}
+.sbadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.sbadge-a { background: #DBEAFE; color: #1E40AF; }
+.sbadge-b { background: #D1FAE5; color: #065F46; }
+.sbadge-c { background: #EDE9FE; color: #5B21B6; }
+.sbadge-d { background: #FEF9C3; color: #854D0E; }
+.sbadge-e { background: #FCE7F3; color: #9D174D; }
+.sbadge-f { background: #F1F5F9; color: #475569; }
+
+/* ── Search Bar ── */
+.link-search-wrap {
+  margin-bottom: 16px;
+}
+.link-search-wrap input {
+  width: 100%;
+  max-width: 480px;
+  padding: 9px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 24px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  background: #fff;
+  transition: .2s;
+}
+.link-search-wrap input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.12);
+}
+
+/* ── Link Grid ── */
+.link-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+/* ── Link Card ── */
+.link-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 14px 12px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: box-shadow .2s, transform .2s;
+}
+.link-card:hover {
+  box-shadow: 0 4px 20px rgba(37,99,235,.15);
+  transform: translateY(-1px);
+}
+
+.card-label {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--navy);
+}
+
+.card-desc {
+  font-size: 12px;
+  color: #64748B;
+  min-height: 16px;
+}
+
+.card-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.btn-open {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  flex: 1;
+  transition: .2s;
+  white-space: nowrap;
+}
+.btn-open:hover {
+  background: #1d4ed8;
+}
+
+.btn-copy {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: .2s;
+  white-space: nowrap;
+}
+.btn-copy:hover {
+  background: #059669;
+  color: #fff;
+  border-color: #059669;
+}
+
+.btn-yt {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: .2s;
+  white-space: nowrap;
+}
+.btn-yt:hover {
+  background: #b91c1c;
+}
+
+/* ── Info Card ── */
+.info-card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.info-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.info-value {
+  font-size: 14px;
+  color: #1E293B;
+  font-weight: 500;
+}
+
+/* ── Kakao Button ── */
+.kakao-btn {
+  background: #FEE500;
+  color: #3C1E1E;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .2s;
+}
+.kakao-btn:hover {
+  background: #fada00;
+}
+
+/* ── Print ── */
+@media print {
+  #top-header { position: static; box-shadow: none; border-bottom: 1px solid #ccc; }
+  .btn-sm, .header-btns { display: none; }
+  .panel-overlay { display: none !important; }
+  .link-card { break-inside: avoid; }
+}
+
+/* ── Mobile ── */
+@media (max-width: 600px) {
+  #top-header { height: auto; flex-wrap: wrap; padding: 8px 12px; gap: 8px; }
+  .header-btns { gap: 4px; }
+  .btn-sm { font-size: 11px; padding: 5px 9px; }
+  #section-linktool { padding: 12px; }
+  .link-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── Top Header ── -->
+<div id="top-header">
+  <div class="logo">🛳 크루즈<span style="color:var(--primary)">닷</span></div>
+  <div class="nav-tab-bar">
+    <button class="nav-tab active" id="tab-linktool" onclick="showSection('linktool')">🔗 퀵업무</button>
+    <button class="nav-tab" id="tab-script" onclick="showSection('script')">📋 콜스크립트</button>
+  </div>
+  <div class="header-btns">
+    <button class="btn-sm" onclick="window.print()">🖨 인쇄</button>
+    <button class="btn-sm btn-blue" onclick="window.open('https://drive.google.com/drive/folders/1NRC2Y9bI_P_MiaF_x7XTCpb_24OMzb47')">📂 빠른상담</button>
+    <button class="btn-sm btn-blue" onclick="window.open('https://drive.google.com/drive/folders/1uswJ8jklueKMuzW8JEFKPM7W-gZ09fSu')">📁 콜txt</button>
+    <button class="btn-sm btn-orange" onclick="showPanel('feedback')">🧠 콜피드백</button>
+    <button class="btn-sm btn-purple" onclick="showPanel('persona')">👤 페르소나</button>
+  </div>
+</div>
+
+<!-- ── Link Tool Section ── -->
+<div id="section-linktool">
+
+  <!-- 검색바 -->
+  <div class="link-search-wrap">
+    <input type="text" id="link-search" placeholder="🔍 링크 검색 (예: 삼성, 브람스, 크루즈...)" oninput="filterCards(this.value)">
+  </div>
+
+  <!-- A섹션 — 기본 렌탈 상품 -->
+  <div class="section-heading"><span class="sbadge sbadge-a">A</span> 기본 렌탈 상품</div>
+  <div class="link-grid">
+
+    <div class="link-card" data-name="삼성 일반 2도어 냉장고 255L 상냉동 하냉장 RT25FARA2S9">
+      <div class="card-label">[삼성] 일반 2도어 냉장고 255L</div>
+      <div class="card-desc">상냉동 하냉장</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://www.samsung.com/sec/refrigerators/top-mount-freezer-rt25fara2s9-d2c/RT25FARA2S9/')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://www.samsung.com/sec/refrigerators/top-mount-freezer-rt25fara2s9-d2c/RT25FARA2S9/', this)">📋 복사</button>
+        <button class="btn-yt" onclick="window.open('https://www.youtube.com/watch?v=4qtB1n1QDJQ')">▶ YT</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="쿠쿠 파워클론 포스 무선청소기 코드프리">
+      <div class="card-label">[쿠쿠] 파워클론 포스 무선청소기</div>
+      <div class="card-desc">코드프리 무선</div>
+      <div class="card-actions">
+        <button class="btn-yt" onclick="window.open('https://www.youtube.com/watch?v=yfL0wAsputU')">▶ YT</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="브람스 릴렉스 프리미엄 안마베드 AB3338B ebrams">
+      <div class="card-label">[브람스] 릴렉스 프리미엄 안마베드</div>
+      <div class="card-desc">헬스케어 안마베드</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://m.ebrams.co.kr/product/%EB%A6%B4%EB%A0%89%EC%8A%A4-%EB%B2%A0%EB%93%9C-%ED%94%84%EB%A6%AC%EB%AF%B8%EC%97%84-ab3338b/285/')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://m.ebrams.co.kr/product/%EB%A6%B4%EB%A0%89%EC%8A%A4-%EB%B2%A0%EB%93%9C-%ED%94%84%EB%A6%AC%EB%AF%B8%EC%97%84-ab3338b/285/', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="더함 스마트 TV QLED 50인치 이동형 스탠드 세트">
+      <div class="card-label">[더함] 스마트 TV QLED 50" + 이동형 스탠드</div>
+      <div class="card-desc">이동형 스탠드 포함</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://www.thehaam.kr/multiple_tv/?idx=173')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://www.thehaam.kr/multiple_tv/?idx=173', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="더함 QLED TV 32인치 포터블 가방 세트">
+      <div class="card-label">[더함] QLED TV 32" + 포터블 가방 세트</div>
+      <div class="card-desc">포터블 가방 세트 포함</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://www.thehaam.kr/TV/?idx=208')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://www.thehaam.kr/TV/?idx=208', this)">📋 복사</button>
+      </div>
+    </div>
+
+  </div><!-- /link-grid A -->
+
+  <!-- B섹션 — 중급 렌탈 상품 -->
+  <div class="section-heading"><span class="sbadge sbadge-b">B</span> 중급 렌탈 상품</div>
+  <div class="link-grid">
+
+    <div class="link-card" data-name="삼성 에어드레서 일반용량 의류관리기 DF18CG3100HR">
+      <div class="card-label">[삼성] 에어드레서 일반용량</div>
+      <div class="card-desc">의류관리기</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://www.samsung.com/sec/airdresser/airdresser-df18cg3100tl-d2c/DF18CG3100HR/')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://www.samsung.com/sec/airdresser/airdresser-df18cg3100tl-d2c/DF18CG3100HR/', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="삼성 제트 AI Lite 무선청소기 VS28D952HCB 비스포크">
+      <div class="card-label">[삼성] 제트 AI Lite 무선청소기</div>
+      <div class="card-desc">비스포크 무선청소기</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://www.samsung.com/sec/vacuum-cleaners/bespoke-jet-vs28d952hc-d2c/VS28D952HCB/')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://www.samsung.com/sec/vacuum-cleaners/bespoke-jet-vs28d952hc-d2c/VS28D952HCB/', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="삼성 55인치 QLED 4K 스마트 TV KQ55QF7SAFXKR">
+      <div class="card-label">[삼성] 55" QLED 4K 스마트 TV</div>
+      <div class="card-desc">QLED 4K 스마트TV</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://www.samsung.com/sec/tvs/qled-qf7s-d2c/KQ55QF7SAFXKR/')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://www.samsung.com/sec/tvs/qled-qf7s-d2c/KQ55QF7SAFXKR/', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="로보락 Qrevo Curv 로봇청소기 roborock">
+      <div class="card-label">[로보락] Qrevo Curv 로봇 청소기</div>
+      <div class="card-desc">올인원 로봇청소기</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://kr.roborock.com/pages/roborock-qrevo-curv')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://kr.roborock.com/pages/roborock-qrevo-curv', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="브람스 안마의자 벨라 S320 brams 네이버">
+      <div class="card-label">[브람스] 안마의자 벨라S320</div>
+      <div class="card-desc">프리미엄 안마의자</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://brand.naver.com/brams/products/11227975372')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://brand.naver.com/brams/products/11227975372', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="브람스 리클라이닝 하우징 소파 네이버">
+      <div class="card-label">[브람스] 리클라이닝 하우징 소파</div>
+      <div class="card-desc">프리미엄 소파</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://brand.naver.com/brams/products/10413308865')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://brand.naver.com/brams/products/10413308865', this)">📋 복사</button>
+      </div>
+    </div>
+
+  </div><!-- /link-grid B -->
+
+  <!-- C섹션 — 프리미엄 렌탈 상품 -->
+  <div class="section-heading"><span class="sbadge sbadge-c">C</span> 프리미엄 렌탈 상품</div>
+  <div class="link-grid">
+
+    <div class="link-card" data-name="삼성 더세리프 QLED TV 스탠드 55인치 KQ55LSD01AFXKR">
+      <div class="card-label">[삼성] 더세리프 QLED TV 스탠드 55"</div>
+      <div class="card-desc">라이프스타일 TV</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://www.samsung.com/sec/tvs/the-serif-lsd01afxkr-d2c/KQ55LSD01AFXKR/')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://www.samsung.com/sec/tvs/the-serif-lsd01afxkr-d2c/KQ55LSD01AFXKR/', this)">📋 복사</button>
+        <button class="btn-yt" onclick="window.open('https://www.youtube.com/watch?v=vtU9-ezPUSU')">▶ YT</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="더함 QLED 85인치 이동형 스탠드 대형 TV">
+      <div class="card-label">[더함] QLED 85" + 이동형 스탠드</div>
+      <div class="card-desc">대형 QLED TV</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://www.thehaam.kr/TV/?idx=170')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://www.thehaam.kr/TV/?idx=170', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="삼성 프리스탠딩 양문형 냉장고 852L RS84DG5022B4">
+      <div class="card-label">[삼성] 프리스탠딩 양문형 냉장고 852L</div>
+      <div class="card-desc">대용량 양문형</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://www.samsung.com/sec/refrigerators/side-by-side-rs84dg5022b4-d2c/RS84DG5022B4/')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://www.samsung.com/sec/refrigerators/side-by-side-rs84dg5022b4-d2c/RS84DG5022B4/', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="삼성 에어드레서 대용량 베이지 DF24CB9600ER">
+      <div class="card-label">[삼성] 에어드레서 대용량 (베이지)</div>
+      <div class="card-desc">대용량 의류관리기</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://www.samsung.com/sec/airdresser/airdresser-df24cb9600wr-d2c/DF24CB9600ER/')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://www.samsung.com/sec/airdresser/airdresser-df24cb9600wr-d2c/DF24CB9600ER/', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="브람스 울트라 S1 안마의자 ebrams 프리미엄">
+      <div class="card-label">[브람스] 울트라 S1 안마의자</div>
+      <div class="card-desc">최상급 안마의자</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://ebrams.co.kr/product/%EC%9A%B8%ED%8A%B8%EB%9D%BC-s1-k7g886gu/247/')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://ebrams.co.kr/product/%EC%9A%B8%ED%8A%B8%EB%9D%BC-s1-k7g886gu/247/', this)">📋 복사</button>
+        <button class="btn-yt" onclick="window.open('https://www.youtube.com/watch?v=JM1Txytvxnw')">▶ YT</button>
+      </div>
+    </div>
+
+  </div><!-- /link-grid C -->
+
+  <!-- D섹션 — 크루즈 관련 링크 -->
+  <div class="section-heading"><span class="sbadge sbadge-d">D</span> 크루즈 관련 링크</div>
+  <div class="link-grid">
+
+    <div class="link-card" data-name="전자청약 가입 청약서 rise2 joeunlife canva">
+      <div class="card-label">전자청약</div>
+      <div class="card-desc">가입 청약서</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://joeunlife.my.canva.site/rise2')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://joeunlife.my.canva.site/rise2', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="신청 랜딩페이지 leadgeny 상담 신청">
+      <div class="card-label">신청 랜딩페이지</div>
+      <div class="card-desc">상담 신청 페이지</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://leadgeny.kr/i/AbP')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://leadgeny.kr/i/AbP', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="렌탈 상품 페이지 netlify roaring-fox">
+      <div class="card-label">렌탈 상품 페이지</div>
+      <div class="card-desc">렌탈 상품 안내</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://roaring-fox-9f3ba7.netlify.app/')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://roaring-fox-9f3ba7.netlify.app/', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="CMS 여행계 안내 영상 유튜브">
+      <div class="card-label">여행계 안내 영상</div>
+      <div class="card-desc">여행계(CMS) 설명</div>
+      <div class="card-actions">
+        <button class="btn-yt" onclick="window.open('https://www.youtube.com/watch?v=xgxw2vvyt2g')">▶ YT</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="가입절차 안내 네이버카페 funhanshop2">
+      <div class="card-label">가입절차 안내</div>
+      <div class="card-desc">네이버 카페</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://cafe.naver.com/funhanshop2/33720')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://cafe.naver.com/funhanshop2/33720', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="렌탈 후기 버버리 leadz vvo">
+      <div class="card-label">렌탈 후기 — 버버리</div>
+      <div class="card-desc">고객 후기</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('http://leadz.kr/vvo')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('http://leadz.kr/vvo', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="렌탈 후기 구찌 leadz vvn">
+      <div class="card-label">렌탈 후기 — 구찌</div>
+      <div class="card-desc">고객 후기</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('http://leadz.kr/vvn')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('http://leadz.kr/vvn', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="렌탈 후기 안마의자 leadz vvp">
+      <div class="card-label">렌탈 후기 — 안마의자</div>
+      <div class="card-desc">고객 후기</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('http://leadz.kr/vvp')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('http://leadz.kr/vvp', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="크루즈 동남아 유튜브 영상">
+      <div class="card-label">크루즈 동남아</div>
+      <div class="card-desc">크루즈 영상</div>
+      <div class="card-actions">
+        <button class="btn-yt" onclick="window.open('https://youtu.be/OVvtsAZGoxo')">▶ YT</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="크루즈 지중해 유튜브 영상">
+      <div class="card-label">크루즈 지중해</div>
+      <div class="card-desc">크루즈 영상</div>
+      <div class="card-actions">
+        <button class="btn-yt" onclick="window.open('https://youtu.be/nnYYts13rSk')">▶ YT</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="크루즈 로얄캐리비안 Royal Caribbean 유튜브 영상">
+      <div class="card-label">크루즈 로얄캐리비안</div>
+      <div class="card-desc">크루즈 영상</div>
+      <div class="card-actions">
+        <button class="btn-yt" onclick="window.open('https://youtu.be/NCgNmkrWrrA')">▶ YT</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="크루즈 MSC 벨리시마 Bellissima 유튜브 영상">
+      <div class="card-label">크루즈 MSC벨리시마</div>
+      <div class="card-desc">크루즈 영상</div>
+      <div class="card-actions">
+        <button class="btn-yt" onclick="window.open('https://youtu.be/QcTTmP5Ldt4')">▶ YT</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="크루즈 후기 유튜브 영상">
+      <div class="card-label">크루즈 후기</div>
+      <div class="card-desc">고객 크루즈 후기 영상</div>
+      <div class="card-actions">
+        <button class="btn-yt" onclick="window.open('https://youtu.be/acYl4x4E6uw')">▶ YT</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="크루즈닷 AI 가이드 숏츠 shorts 유튜브">
+      <div class="card-label">크루즈닷 AI 가이드</div>
+      <div class="card-desc">유튜브 숏츠</div>
+      <div class="card-actions">
+        <button class="btn-yt" onclick="window.open('https://youtube.com/shorts/-p_6G69MgyQ')">▶ YT</button>
+      </div>
+    </div>
+
+  </div><!-- /link-grid D -->
+
+  <!-- E섹션 — 마비즈 카페 -->
+  <div class="section-heading"><span class="sbadge sbadge-e">E</span> 🏠 마비즈 카페</div>
+  <div class="link-grid">
+
+    <div class="link-card" data-name="상품 판매 공지 필수확인 마비즈 카페 170">
+      <div class="card-label">📢 상품 판매 공지 필수확인</div>
+      <div class="card-desc">판매 중인 상품 공지 모음</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://cafe.naver.com/f-e/cafes/30442342/menus/170')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://cafe.naver.com/f-e/cafes/30442342/menus/170', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="TM 복기 콜 분석 통화 복기 자료 마비즈 카페 154">
+      <div class="card-label">📞 TM 복기 콜 분석</div>
+      <div class="card-desc">통화 복기 자료 — 콜 개선 핵심</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://cafe.naver.com/f-e/cafes/30442342/menus/154')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://cafe.naver.com/f-e/cafes/30442342/menus/154', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="Todo 일정 할 일 스케줄 체크 마비즈 카페 153">
+      <div class="card-label">✅ Todo 일정</div>
+      <div class="card-desc">할 일 / 스케줄 체크</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://cafe.naver.com/f-e/cafes/30442342/menus/153')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://cafe.naver.com/f-e/cafes/30442342/menus/153', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="챌린지 공지 참여 마비즈 카페 171">
+      <div class="card-label">🏆 챌린지 공지</div>
+      <div class="card-desc">챌린지 참여 공지</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://cafe.naver.com/f-e/cafes/30442342/menus/171')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://cafe.naver.com/f-e/cafes/30442342/menus/171', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="모니카 세일즈 교육 자료 마비즈 카페 176">
+      <div class="card-label">📚 모니카 세일즈 교육</div>
+      <div class="card-desc">세일즈 교육 자료</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://cafe.naver.com/f-e/cafes/30442342/menus/176')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://cafe.naver.com/f-e/cafes/30442342/menus/176', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="세일즈 도구 자료 영업 도구 모음 마비즈 카페 155">
+      <div class="card-label">🛠 세일즈 도구 자료</div>
+      <div class="card-desc">영업에 쓰는 도구/자료 모음</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://cafe.naver.com/f-e/cafes/30442342/menus/155')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://cafe.naver.com/f-e/cafes/30442342/menus/155', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="영업 자료 다운로드 마비즈 카페 161">
+      <div class="card-label">⬇️ 영업 자료 다운</div>
+      <div class="card-desc">다운로드 가능한 영업 자료</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://cafe.naver.com/f-e/cafes/30442342/menus/161')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://cafe.naver.com/f-e/cafes/30442342/menus/161', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="스킬 교육 상담 스킬 게시판 마비즈 카페 82">
+      <div class="card-label">⚡ 스킬 교육</div>
+      <div class="card-desc">상담 스킬 교육 게시판</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://cafe.naver.com/f-e/cafes/30442342/menus/82')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://cafe.naver.com/f-e/cafes/30442342/menus/82', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="본사 컨텐츠 공식 마비즈 카페 172">
+      <div class="card-label">🏢 본사 컨텐츠</div>
+      <div class="card-desc">본사 공식 컨텐츠</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://cafe.naver.com/f-e/cafes/30442342/menus/172')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://cafe.naver.com/f-e/cafes/30442342/menus/172', this)">📋 복사</button>
+      </div>
+    </div>
+
+    <div class="link-card" data-name="SNS 마케팅 전략 자료 마비즈 카페 37">
+      <div class="card-label">📱 SNS 마케팅</div>
+      <div class="card-desc">SNS 마케팅 전략 / 자료</div>
+      <div class="card-actions">
+        <button class="btn-open" onclick="window.open('https://cafe.naver.com/f-e/cafes/30442342/menus/37')">🔗 열기</button>
+        <button class="btn-copy" onclick="copyText('https://cafe.naver.com/f-e/cafes/30442342/menus/37', this)">📋 복사</button>
+      </div>
+    </div>
+
+  </div><!-- /link-grid E -->
+
+  <!-- F섹션 — 연락처 & 오피스 -->
+  <div class="section-heading"><span class="sbadge sbadge-f">F</span> 연락처 &amp; 오피스</div>
+  <div class="link-grid">
+
+    <div class="info-card">
+      <div class="info-label">🏢 화성 본점</div>
+      <div class="info-value"><strong>크루즈닷</strong> — 효행로 1068 603-A60호 (병점동 844-5)</div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-label">🤝 상담 미팅</div>
+      <div class="info-value"><strong>(주)마비즈컴퍼니</strong> — 경기 성남시 수정구 창업로 43 글로벌비즈센터 업무동 1층</div>
+    </div>
+
+    <div class="info-card">
+      <div class="info-label">📞 대표전화</div>
+      <div class="info-value"><a href="tel:01032893800">010-3289-3800</a></div>
+    </div>
+
+  </div><!-- /link-grid F -->
+
+</div><!-- /#section-linktool -->
+
+<!-- ── Script Section (v19 viewer iframe) ── -->
+<div id="section-script" style="display:none">
+<iframe src="docs/work_orders/크루즈닷_콜스크립트_뷰어.html" style="width:100%;height:calc(100vh - 52px);border:none;display:block"></iframe>
+</div><!-- /#section-script -->
+
+<!-- ── Inline JS (basic functionality without Part C) ── -->
+<script>
+function filterCards(q) {
+  document.querySelectorAll('.link-card').forEach(card => {
+    const match = !q || card.dataset.name.includes(q) || card.textContent.includes(q);
+    card.style.display = match ? '' : 'none';
+  });
+}
+function copyText(text, btn) {
+  navigator.clipboard.writeText(text).catch(() => {
+    const t = document.createElement('textarea');
+    t.value = text; document.body.appendChild(t); t.select();
+    document.execCommand('copy'); document.body.removeChild(t);
+  });
+  const orig = btn.textContent;
+  btn.textContent = '복사됨!'; btn.style.background = '#16a34a'; btn.style.color = '#fff';
+  setTimeout(() => { btn.textContent = orig; btn.style.background = ''; btn.style.color = ''; }, 1500);
+}
+function showSection(name) {
+  document.getElementById('section-linktool').style.display = name === 'linktool' ? 'block' : 'none';
+  document.getElementById('section-script').style.display = name === 'script' ? 'block' : 'none';
+  document.getElementById('tab-linktool').classList.toggle('active', name === 'linktool');
+  document.getElementById('tab-script').classList.toggle('active', name === 'script');
+  history.pushState(null, '', '#' + name);
+}
+/* showPanel/hidePanel defined in PART_C */
+window.addEventListener('load', () => {
+  const hash = location.hash.replace('#','') || 'linktool';
+  showSection(hash);
+});
+window.addEventListener('hashchange', () => showSection(location.hash.replace('#','') || 'linktool'));
+</script>
+
+<!-- PART_C: Overlay Panels + Full JS -->
+<style>
+/* ── Overlay Panel System ── */
+.panel-overlay {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.55);
+  z-index:500; overflow-y:auto; padding:20px;
+}
+.panel-overlay.active { display:flex; align-items:flex-start; justify-content:center; }
+.panel-box {
+  background:#fff; border-radius:14px; max-width:740px; width:100%;
+  margin:auto; padding:28px; box-shadow:0 8px 40px rgba(0,0,0,.25);
+  position:relative; min-height:400px;
+}
+.panel-close {
+  position:absolute; top:16px; right:16px; background:none; border:none;
+  font-size:22px; cursor:pointer; color:#64748b; line-height:1;
+}
+.panel-close:hover { color:#dc2626; }
+.panel-title { font-size:20px; font-weight:700; color:#1E3A5F; margin-bottom:6px; }
+.panel-subtitle { font-size:13px; color:#64748b; margin-bottom:20px; }
+
+/* Upload */
+.upload-area {
+  border:2px dashed #93C5FD; border-radius:10px; padding:24px; text-align:center;
+  background:#EFF6FF; cursor:pointer; transition:all .2s; margin-bottom:16px;
+}
+.upload-area:hover { border-color:#2563EB; background:#DBEAFE; }
+.upload-area p { color:#2563EB; font-weight:600; margin-bottom:4px; font-size:15px; }
+.upload-area small { color:#64748b; }
+
+/* Buttons */
+.analyze-btn {
+  width:100%; padding:13px; background:#2563EB; color:#fff; border:none;
+  border-radius:8px; font-size:15px; font-weight:700; cursor:pointer; margin-bottom:20px;
+}
+.analyze-btn:hover { background:#1D4ED8; }
+.analyze-btn:disabled { background:#94a3b8; cursor:not-allowed; }
+
+/* Score */
+.score-total {
+  text-align:center; padding:24px; background:linear-gradient(135deg,#1E3A5F,#2563EB);
+  border-radius:12px; color:#fff; margin-bottom:20px;
+}
+.score-total .big-score { font-size:64px; font-weight:900; line-height:1; }
+.grade-badge {
+  display:inline-block; padding:4px 16px; border-radius:20px;
+  font-weight:700; font-size:16px; margin-top:8px;
+}
+.grade-S { background:#FFD700; color:#1E3A5F; }
+.grade-A { background:#22C55E; color:#fff; }
+.grade-B { background:#3B82F6; color:#fff; }
+.grade-C { background:#F97316; color:#fff; }
+.grade-D { background:#EF4444; color:#fff; }
+
+/* Step cards */
+.step-scores { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+@media(max-width:600px){.step-scores{grid-template-columns:1fr;}}
+.step-card { border:1px solid #E2E8F0; border-radius:10px; padding:12px; background:#fff; }
+.step-card .step-name { font-size:12px; color:#64748b; margin-bottom:4px; }
+.step-card .step-score { font-size:22px; font-weight:700; }
+.step-card .step-bar-wrap { height:6px; background:#E2E8F0; border-radius:3px; margin-top:6px; }
+.step-card .step-bar { height:6px; border-radius:3px; transition:width .6s; }
+.step-card .step-feedback { font-size:12px; color:#475569; margin-top:6px; line-height:1.5; }
+
+/* Coaching boxes */
+.emotion-coaching {
+  background:#FFF7ED; border:1px solid #FED7AA; border-radius:10px;
+  padding:16px; margin-bottom:16px;
+}
+.emotion-coaching h4 { color:#9A3412; font-size:14px; font-weight:700; margin-bottom:10px; }
+.emotion-coaching p { font-size:13px; color:#7C2D12; line-height:1.7; white-space:pre-line; }
+
+/* SMS */
+.sms-recommend {
+  background:#F0FDF4; border:1px solid #BBF7D0; border-radius:10px;
+  padding:16px; margin-bottom:16px;
+}
+.sms-recommend h4 { color:#065F46; font-size:14px; font-weight:700; margin-bottom:10px; }
+.sms-box {
+  background:#fff; border:1px solid #D1FAE5; border-radius:8px; padding:12px;
+  margin-bottom:8px; position:relative; padding-right:70px;
+}
+.sms-box .sms-text { font-size:12.5px; color:#1E293B; line-height:1.7; white-space:pre-line; }
+.sms-copy-btn {
+  position:absolute; top:8px; right:8px; background:#10B981; color:#fff;
+  border:none; border-radius:5px; padding:4px 10px; font-size:11px; cursor:pointer;
+}
+.landing-links { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.landing-chip {
+  display:inline-flex; align-items:center; gap:6px; padding:6px 12px;
+  border-radius:20px; font-size:12px; font-weight:600; cursor:pointer;
+  text-decoration:none; border:none;
+}
+.chip-gold { background:#FEF3C7; color:#92400E; border:1px solid #FDE68A; }
+.chip-rental { background:#DBEAFE; color:#1E40AF; border:1px solid #93C5FD; }
+.chip-cruise { background:#EDE9FE; color:#5B21B6; border:1px solid #C4B5FD; }
+.chip-kakao { background:#FEE500; color:#3C1E1E; border:1px solid #FCD34D; }
+
+/* Summary box */
+.summary-box {
+  background:#F8FAFC; border-radius:10px; padding:16px; margin-bottom:16px;
+  border:1px solid #E2E8F0;
+}
+.summary-box h4 { font-size:14px; font-weight:700; color:#1E3A5F; margin-bottom:10px; }
+.summary-box p { font-size:13px; color:#374151; line-height:1.7; }
+
+/* ── Persona Panel ── */
+.persona-form { display:grid; gap:14px; margin-bottom:20px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+@media(max-width:560px){.form-row{grid-template-columns:1fr;}}
+.form-group label { display:block; font-size:12px; font-weight:600; color:#374151; margin-bottom:4px; }
+.form-group select, .form-group input {
+  width:100%; padding:9px 12px; border:1px solid #E2E8F0; border-radius:7px;
+  font-size:13px; background:#fff; color:#1E293B;
+}
+.form-group select:focus, .form-group input:focus { outline:none; border-color:#2563EB; }
+
+.type-badge-big {
+  display:flex; align-items:center; gap:12px; background:linear-gradient(135deg,#1E3A5F,#2563EB);
+  color:#fff; border-radius:12px; padding:16px 20px; margin-bottom:16px;
+}
+.type-badge-big .type-num { font-size:52px; font-weight:900; line-height:1; }
+.type-badge-big .type-info h3 { font-size:18px; font-weight:700; }
+.type-badge-big .type-info p { font-size:13px; opacity:.85; margin-top:4px; }
+
+.closing-rate {
+  background:#F0FDF4; border:1px solid #BBF7D0; border-radius:10px;
+  padding:14px 16px; margin-bottom:14px; text-align:center;
+}
+.closing-rate .rate-num { font-size:36px; font-weight:900; color:#059669; }
+.closing-rate p { font-size:12px; color:#065F46; margin-top:4px; }
+
+.strategy-section { margin-bottom:16px; }
+.strategy-section h4 {
+  font-size:14px; font-weight:700; color:#1E3A5F; margin-bottom:8px;
+  padding-bottom:6px; border-bottom:2px solid #E2E8F0;
+}
+.strategy-list { list-style:none; padding:0; }
+.strategy-list li {
+  padding:7px 0; font-size:13px; color:#374151;
+  border-bottom:1px solid #F1F5F9; line-height:1.5;
+}
+.strategy-list li:last-child { border:none; }
+.strategy-list li::before { content:"→ "; color:#2563EB; font-weight:700; }
+
+.opening-box {
+  background:#EFF6FF; border-left:4px solid #2563EB; padding:13px 16px;
+  border-radius:0 8px 8px 0; margin-bottom:12px; font-size:13px;
+  line-height:1.8; white-space:pre-line;
+}
+
+.caution-box {
+  background:#FFF1F2; border-left:4px solid #EF4444; padding:12px 16px;
+  border-radius:0 8px 8px 0; font-size:13px; color:#9F1239;
+  margin-bottom:12px; line-height:1.6;
+}
+
+.step-guide .step-item {
+  display:flex; gap:12px; padding:10px 0;
+  border-bottom:1px solid #F1F5F9;
+}
+.step-guide .step-num {
+  width:28px; height:28px; background:#2563EB; color:#fff; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:12px; font-weight:700; flex-shrink:0;
+}
+.step-guide .step-content h5 { font-size:13px; font-weight:700; color:#1E293B; margin-bottom:3px; }
+.step-guide .step-content p { font-size:12px; color:#475569; line-height:1.55; }
+</style>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PANEL 1: 콜 피드백 분석기                        -->
+<!-- ════════════════════════════════════════════ -->
+<div id="panel-feedback" class="panel-overlay" onclick="if(event.target===this)hidePanel('feedback')">
+  <div class="panel-box">
+    <button class="panel-close" onclick="hidePanel('feedback')">✕</button>
+    <div class="panel-title">🧠 콜 피드백 분석기</div>
+    <div class="panel-subtitle">통화 내용을 텍스트 파일(.txt)로 올리면 자동으로 점수와 코칭을 드려요</div>
+
+    <div class="upload-area" id="fb-upload-area" onclick="document.getElementById('fb-file').click()">
+      <p>📁 콜 녹취 텍스트 파일 올리기</p>
+      <small>TXT 파일 · 드래그앤드롭도 가능해요</small>
+    </div>
+    <input type="file" id="fb-file" accept=".txt" style="display:none">
+    <div id="fb-filename" style="font-size:13px;color:#64748b;margin-bottom:12px;min-height:18px;"></div>
+    <button class="analyze-btn" id="fb-btn" onclick="analyzeFeedback()" disabled>분석 시작하기</button>
+
+    <div id="fb-result" style="display:none">
+      <!-- 총점 -->
+      <div class="score-total">
+        <div class="big-score" id="fb-total-score">0</div>
+        <div style="font-size:15px;margin-top:4px">점 / 100점</div>
+        <div class="grade-badge" id="fb-grade">-</div>
+      </div>
+
+      <!-- 8단계 -->
+      <h4 style="font-size:14px;font-weight:700;color:#1E3A5F;margin-bottom:12px;">📊 단계별 평가</h4>
+      <div class="step-scores" id="fb-steps"></div>
+
+      <!-- 감정 코칭 -->
+      <div class="emotion-coaching" id="fb-emotion-coaching" style="display:none">
+        <h4>💡 감정 표현 코칭 — 이렇게 해보세요</h4>
+        <p id="fb-emotion-text"></p>
+      </div>
+
+      <!-- 종합 피드백 -->
+      <div class="summary-box">
+        <h4>📝 종합 피드백</h4>
+        <p id="fb-summary"></p>
+      </div>
+
+      <!-- 문자 추천 -->
+      <div class="sms-recommend">
+        <h4>📱 추천 후속 문자 — 클릭해서 복사하세요</h4>
+        <div id="fb-sms-list"></div>
+        <div class="landing-links" id="fb-landing-links"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════ -->
+<!-- PANEL 2: 페르소나 분석기                          -->
+<!-- ════════════════════════════════════════════ -->
+<div id="panel-persona" class="panel-overlay" onclick="if(event.target===this)hidePanel('persona')">
+  <div class="panel-box">
+    <button class="panel-close" onclick="hidePanel('persona')">✕</button>
+    <div class="panel-title">👤 고객 페르소나 분석</div>
+    <div class="panel-subtitle">고객 정보를 입력하면 맞춤 상담 전략과 추천 문자를 알려드립니다</div>
+
+    <div class="persona-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>나이대</label>
+          <select id="p-age">
+            <option value="">선택하세요</option>
+            <option value="40대">40대</option>
+            <option value="50대">50대</option>
+            <option value="60대">60대</option>
+            <option value="70대+">70대+</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>성별</label>
+          <select id="p-gender">
+            <option value="">선택하세요</option>
+            <option value="여성">여성</option>
+            <option value="남성">남성</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>직업 / 생활 패턴</label>
+          <select id="p-job">
+            <option value="">선택하세요</option>
+            <option value="주부">주부</option>
+            <option value="직장인">직장인</option>
+            <option value="자영업">자영업</option>
+            <option value="은퇴">은퇴 / 노후</option>
+            <option value="전문직">전문직</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>경제적 여유</label>
+          <select id="p-money">
+            <option value="">선택하세요</option>
+            <option value="여유있음">여유있음</option>
+            <option value="보통">보통</option>
+            <option value="빠듯함">빠듯함</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>전화 받았을 때 첫 반응</label>
+        <select id="p-reaction">
+          <option value="">선택하세요</option>
+          <option value="궁금">관심 있어요 / 궁금해요</option>
+          <option value="바쁨">바빠요 / 나중에 연락하세요</option>
+          <option value="비쌈">비싸요 / 부담돼요</option>
+          <option value="의심">믿을 수 있나요? / 다단계 아닌가요?</option>
+          <option value="배우자">남편 / 아내랑 상의해야 해요</option>
+          <option value="모름">잘 모르겠어요</option>
+          <option value="재콜">이전에 통화한 적 있어요</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>여행에 대한 태도</label>
+        <select id="p-travel">
+          <option value="">선택하세요</option>
+          <option value="꿈">크루즈 꼭 가보고 싶었어요</option>
+          <option value="막연">여행은 좋아하는데 크루즈는 잘 몰라요</option>
+          <option value="안감">여행을 별로 안 가요</option>
+          <option value="고가">비싼 여행은 안 해봤어요</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>특이사항 (선택)</label>
+        <input type="text" id="p-note" placeholder="예: 남편이 반대함, 건강 이슈 있음, 이전 통화에서 관심 보임...">
+      </div>
+    </div>
+    <button class="analyze-btn" onclick="analyzePersona()">상담 전략 분석하기</button>
+
+    <div id="persona-result" style="display:none">
+      <div class="type-badge-big">
+        <div class="type-num" id="p-type-num">-</div>
+        <div class="type-info">
+          <h3 id="p-type-name">-</h3>
+          <p id="p-type-desc">-</p>
+        </div>
+      </div>
+
+      <div class="closing-rate">
+        <div class="rate-num" id="p-closing-rate">-</div>
+        <p id="p-closing-desc">예상 클로징률</p>
+      </div>
+
+      <div class="strategy-section">
+        <h4>💬 추천 첫 마디 (그대로 써도 됩니다)</h4>
+        <div class="opening-box" id="p-opening">-</div>
+      </div>
+
+      <div class="strategy-section">
+        <h4>📋 단계별 상담 순서</h4>
+        <div class="step-guide" id="p-step-guide"></div>
+      </div>
+
+      <div class="strategy-section">
+        <h4>🎯 이 고객에게 효과적인 것</h4>
+        <ul class="strategy-list" id="p-strategies"></ul>
+      </div>
+
+      <div class="caution-box" id="p-caution"></div>
+
+      <div class="sms-recommend">
+        <h4>📱 추천 문자 — 전화 전 or 후에 발송하세요</h4>
+        <div id="p-sms-list"></div>
+        <div class="landing-links" id="p-landing-links"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// Panel Show/Hide
+// ═══════════════════════════════════════════════
+function showPanel(name) {
+  var el = document.getElementById('panel-' + name);
+  if (el) { el.style.display = 'flex'; el.classList.add('active'); }
+}
+function hidePanel(name) {
+  var el = document.getElementById('panel-' + name);
+  if (el) { el.style.display = 'none'; el.classList.remove('active'); }
+}
+
+// ═══════════════════════════════════════════════
+// 파일 업로드 + 드래그앤드롭
+// ═══════════════════════════════════════════════
+(function() {
+  var fileInput = document.getElementById('fb-file');
+  if (!fileInput) return;
+  fileInput.addEventListener('change', function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    window._fbFile = file;
+    document.getElementById('fb-filename').textContent = '📄 ' + file.name + ' (' + Math.round(file.size/1024) + 'KB)';
+    document.getElementById('fb-btn').disabled = false;
+  });
+
+  var area = document.getElementById('fb-upload-area');
+  if (!area) return;
+  area.addEventListener('dragover', function(e) { e.preventDefault(); area.style.borderColor='#2563EB'; });
+  area.addEventListener('dragleave', function() { area.style.borderColor=''; });
+  area.addEventListener('drop', function(e) {
+    e.preventDefault(); area.style.borderColor='';
+    var file = e.dataTransfer.files[0];
+    if (file && (file.name.endsWith('.txt') || file.type === 'text/plain')) {
+      window._fbFile = file;
+      document.getElementById('fb-filename').textContent = '📄 ' + file.name;
+      document.getElementById('fb-btn').disabled = false;
+    }
+  });
+})();
+
+function analyzeFeedback() {
+  if (!window._fbFile) return;
+  var btn = document.getElementById('fb-btn');
+  btn.disabled = true; btn.textContent = '분석 중...';
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var text = e.target.result;
+    var result = scoreCall(text);
+    displayFeedback(result, text);
+    btn.disabled = false; btn.textContent = '다시 분석하기';
+    document.getElementById('fb-result').scrollIntoView({ behavior:'smooth' });
+  };
+  reader.readAsText(window._fbFile, 'UTF-8');
+}
+
+// ═══════════════════════════════════════════════
+// 8단계 채점 (쉬운 한국어)
+// ═══════════════════════════════════════════════
+function scoreCall(text) {
+  var t = text;
+
+  // ── 문맥 파악 (이의제기가 실제로 있었나?) ──
+  var hasObjSangjo = /상조|다단계|피라미드|사기|불법/.test(t);
+  var hasObjPrice  = /비싸|부담|돈이|없어요|못해요|형편/.test(t);
+  var hasObjSpouse = /남편|아내|배우자|상의/.test(t);
+  var hasAnyObj    = hasObjSangjo || hasObjPrice || hasObjSpouse;
+  var customerAgreed = /좋아요|할게요|해볼게요|신청|알겠어요|그렇게|맞아요|감사/.test(t);
+
+  // ── 6단계 감정 중심 채점 ──
+  var steps = [
+    {
+      id:'opening', name:'오프닝 & 신원확립', icon:'👋', maxPt:20,
+      check: function() {
+        var s = 0;
+        if (/크루즈닷/.test(t)) s += 7;          // 회사 이름 밝힘
+        if (/매니저|담당/.test(t)) s += 6;        // 역할 밝힘
+        if (/안녕|반갑|통화 가능|5분|잠깐/.test(t)) s += 7; // 따뜻한 시작
+        return Math.min(s, 20);
+      },
+      feedbackFn: function(s) {
+        if (s >= 17) return '✅ 오프닝 완벽해요! 따뜻하고 명확하게 크루즈닷 매니저로 시작했어요.';
+        if (s >= 12) return '😊 오프닝은 괜찮아요. "크루즈닷 담당 매니저 OOO입니다~" 처럼 조금 더 밝게 해보세요.';
+        return '⚠️ 오프닝에서 누구인지 명확히 밝혀야 해요. "안녕하세요 OO님~ 크루즈닷 매니저 OOO입니다. 잠깐 5분만 괜찮으세요?" 처럼 시작하세요.';
+      },
+      emotionFn: function(s) {
+        if (s >= 14) return null;
+        return '【오프닝 감정 코칭】\n마치 오랜 친구에게 전화하듯이 목소리를 올려서 밝게 시작하세요. "안녕하세요~"에서 마지막 "요~"를 살짝 올리면 훨씬 친근해져요. 첫 5초가 통화 전체 분위기를 결정해요!';
+      }
+    },
+    {
+      id:'rapport', name:'감정 공감 & 라포', icon:'💬', maxPt:20,
+      check: function() {
+        var s = 0;
+        // 고객 말에 반응했나 (짧은 공감어)
+        if (/그렇군요|그러셨군요|정말요|맞아요|아 그렇구나|네~|네 네/.test(t)) s += 8;
+        // 고객 상황을 물어봤나
+        if (/어떠세요|어떻게|혹시|가족|함께|같이|남편|아내/.test(t)) s += 7;
+        // 고객 이름을 불렀나 (OO님)
+        if (/님/.test(t)) s += 5;
+        return Math.min(s, 20);
+      },
+      feedbackFn: function(s) {
+        if (s >= 17) return '✅ 고객과 감정적으로 잘 연결됐어요! 고객이 편하게 대화했을 것 같아요.';
+        if (s >= 12) return '😊 라포 형성은 했지만, 고객 말에 더 적극적으로 공감 반응을 보여주면 좋겠어요.';
+        return '⚠️ 고객이 말할 때 "그렇군요~", "정말요~", "OO님 좋으시겠다~" 같은 공감 반응을 더 많이 해주세요. 고객이 말하고 싶게 만들어야 해요.';
+      },
+      emotionFn: function(s) {
+        if (s >= 14) return null;
+        return '【감정 공감 코칭】\n고객이 말할 때 "와~", "그러셨어요?", "맞아요 맞아요~" 같은 진심 어린 반응을 자주 해주세요. 고객이 "이 사람이 날 진짜 관심 있어하는구나" 느끼면 훨씬 열린 마음으로 대화해요. 1분에 최소 3번 이상 공감해주세요.';
+      }
+    },
+    {
+      id:'desire1', name:'여행 꿈 & 욕망 증폭', icon:'✈️', maxPt:25,
+      check: function() {
+        var s = 0;
+        // 질문형 발화 — 고객이 스스로 생각하고 답하게 만들었나?
+        if (/어떨 것 같으세요|상상해보세요|뭘 제일|어떻게 생각|어디가 제일|한번 떠올려|그려보세요/.test(t)) s += 7;
+        // 구체적 여행지 언급
+        if (/지중해|동남아|일본|유럽|오키나와|싱가포르|베트남|홍콩|로얄캐리비안|MSC/.test(t)) s += 6;
+        // 크루즈 경험 생생하게
+        if (/석양|뷔페|무제한|기항지|항구|선상|바다|파도|야경/.test(t)) s += 5;
+        // 고객이 스스로 욕망 표현 (고객 발화)
+        if (/가고싶|가보고싶|정말요|좋겠|그렇구나|설레|너무 좋|꼭 가/.test(t)) s += 7;
+        return Math.min(s, 25);
+      },
+      feedbackFn: function(s) {
+        if (s >= 20) return '✅ 질문으로 고객이 스스로 "가고 싶다!"고 말하게 만들었어요. 욕망 증폭 성공!';
+        if (s >= 14) return '😊 여행 이야기를 했지만, "어떨 것 같으세요?" 같은 질문으로 고객이 직접 말하게 해보세요. 설명보다 질문이 더 강해요.';
+        return '⚠️ 상담사가 너무 설명만 했어요! "지중해에서 석양 보시면 어떨 것 같으세요?" 이렇게 질문하고 기다리면 고객 입에서 "너무 좋겠다~"가 나와요. 이게 핵심이에요!';
+      },
+      emotionFn: function(s) {
+        if (s >= 18) return null;
+        return '【욕망 증폭 & 질문형 상담 코칭 — 가장 중요!】\n최고의 세일즈는 "설명"이 아니라 "질문"이에요.\n\n❌ 틀린 방식: "저희 크루즈는 석양이 아름답고 뷔페가 무제한이고..."\n✅ 맞는 방식: "지중해에서 석양 보시면 어떨 것 같으세요?" → 5초 기다림\n\n고객 입에서 "너무 좋겠다", "가고 싶다"가 나와야 클로징이 가능해요.\n그 말이 나오지 않으면 클로징 시도가 어렵습니다.\n\n구체적인 여행지 이름 (지중해, 로얄캐리비안, 오키나와)으로 장면을 그리고 → 질문하고 → 기다리세요.';
+      }
+    },
+    {
+      id:'goldbomb', name:'골드바 & 선물 공개', icon:'🏅', maxPt:20,
+      check: function() {
+        var s = 0;
+        if (/골드바|금/.test(t)) s += 10;         // 골드바 공개
+        if (/무료탑승|무료 탑승|크루즈 무료/.test(t)) s += 7; // 무료 크루즈
+        if (/증정|선물|드려요|드립니다/.test(t)) s += 3; // 증정 표현
+        return Math.min(s, 20);
+      },
+      feedbackFn: function(s) {
+        if (s >= 17) return '✅ 골드바 & 무료탑승 서프라이즈를 잘 활용했어요! 고객이 흥분했을 것 같아요.';
+        if (s >= 10) return '😊 골드바나 무료탑승을 언급했지만, 더 드라마틱하게 공개하면 효과가 커요.';
+        if (s >= 1) return '😊 골드바 또는 무료탑승 중 하나를 언급했어요. 두 가지 모두 활용해보세요.';
+        return '⚠️ "그런데 지금 이벤트로 골드바도 드려요!" 이 한 마디가 고객 흥분도를 확 올려요. 크루즈 무료탑승도 함께 공개하면 완벽해요!';
+      },
+      emotionFn: function(s) {
+        if (s >= 10) return null;
+        return '【골드바 공개 감정 코칭】\n이 부분은 "서프라이즈 선물" 느낌으로 말해야 해요. "그런데! 그것만이 아니에요~" 하고 목소리 톤을 올린 다음 "골드바도 드려요!" 이렇게 발표하듯이 말해보세요. 고객이 예상 못 한 선물일수록 임팩트가 커요.';
+      }
+    },
+    {
+      id:'closing', name:'클로징 & 결정 이끌기', icon:'🎯', maxPt:10,
+      check: function() {
+        var s = 0;
+        if (/a플랜|33000|3만3천|플랜/.test(t)) s += 4;  // 플랜 제시
+        if (/어떠세요|생각하세요|하실|결정|시작|신청/.test(t)) s += 4; // 결정 요청
+        if (/오늘|지금|이번달|마감/.test(t)) s += 2;   // 긴급성
+        return Math.min(s, 10);
+      },
+      feedbackFn: function(s) {
+        if (s >= 8) return '✅ 자신감 있게 클로징했어요!';
+        if (s >= 5) return '😊 클로징 시도는 했어요. 더 자신감 있게 결정을 요청해보세요.';
+        return '⚠️ 클로징을 시도했나요? "A플랜 월 33,000원이에요. 오늘 시작하시면 어떨까요?" 처럼 명확하게 결정을 요청해야 해요.';
+      },
+      emotionFn: function(s) {
+        if (s >= 7) return null;
+        return '【클로징 감정 코칭】\n클로징할 때 주저하면 고객도 망설여요. "당연히 하시겠죠~" 하는 여유로운 자신감으로 "A플랜 어떠세요?"라고 물어보세요. 마치 이미 결정된 것처럼 자연스럽게요.';
+      }
+    },
+    {
+      id:'nextstep', name:'다음 단계 약속', icon:'📅', maxPt:5,
+      check: function() {
+        var s = 0;
+        if (/내일|다음|이번주|연락|문자|다시/.test(t)) s += 3;
+        if (/감사|수고|언제든|편하게/.test(t)) s += 2;
+        return Math.min(s, 5);
+      },
+      feedbackFn: function(s) {
+        if (s >= 4) return '✅ 마무리와 다음 약속이 깔끔해요!';
+        if (s >= 2) return '😊 마무리는 했지만, 다음 약속을 더 명확히 잡으면 좋겠어요.';
+        return '⚠️ "내일 문자 드릴게요. 편하실 때 연락 주세요~" 처럼 다음 접점을 꼭 만들고 끝내세요.';
+      },
+      emotionFn: null
+    }
+  ];
+
+  var total = 0;
+  var results = steps.map(function(step) {
+    var score = step.check();
+    total += score;
+    var feedback = step.feedbackFn(score);
+    var emotion = typeof step.emotionFn === 'function' ? step.emotionFn(score) : null;
+    return { id:step.id, name:step.name, icon:step.icon, maxPt:step.maxPt, score:score, feedback:feedback, emotion:emotion };
+  });
+
+  // ── 이의처리 보너스 (실제로 이의제기가 있을 때만 평가) ──
+  var bonus = 0;
+  var bonusNote = '';
+  if (hasAnyObj) {
+    var objHandled = /당연|그렇죠|이해|맞아요|공감|그런 생각/.test(t); // 공감 먼저?
+    var objResolved = /신한은행|공식|14일|취소|청약철회|등록|여행사/.test(t); // 해결책 제시?
+    if (objHandled) bonus += 5;
+    if (objResolved) bonus += 5;
+    total += bonus;
+    if (bonus >= 8) bonusNote = '🎉 보너스 +' + bonus + '점: 이의처리를 공감부터 잘 해결했어요!';
+    else if (bonus >= 4) bonusNote = '✅ 보너스 +' + bonus + '점: 이의처리를 시도했어요. 공감을 먼저 하면 더 좋아요.';
+    else bonusNote = '💡 이의제기가 있었는데, "당연히 그런 생각 드실 수 있죠~" 공감 먼저 하고 설명하면 더 좋아요.';
+  }
+
+  var emotionItems = results.filter(function(r){ return r.emotion; });
+  var emotionCoaching = emotionItems.length > 0 ? emotionItems.map(function(r){ return r.emotion; }).join('\n\n') : null;
+
+  total = Math.min(total, 100);
+  var grade = total >= 90 ? 'S' : total >= 80 ? 'A' : total >= 70 ? 'B' : total >= 60 ? 'C' : 'D';
+  var summaries = {
+    S: '최고예요! 오프닝부터 클로징까지 감정 흐름이 완벽했어요. 고객이 충분히 설레고 신뢰했을 것 같아요. 이 페이스 유지하면 클로징률 상위권이에요!',
+    A: '전반적으로 잘 하셨어요! 욕망 증폭이나 골드바 공개 같은 핵심 단계를 조금 더 다듬으면 S등급 바로 가요.',
+    B: '기본기는 되어 있어요. 감정 전달이 조금 약해요. 특히 여행 꿈 키우기 단계에서 더 생생하게 그림을 그려주세요. 스크립트를 소리 내어 읽으며 연습해보세요.',
+    C: '연습이 더 필요해요. 3단계(욕망 부풀리기)를 집중 연습해보세요. 고객이 "나도 가고 싶다!"는 말이 나와야 클로징이 가능해요.',
+    D: '아직 시작 단계예요! 낙담하지 마세요. 오프닝 첫 말부터 소리 내어 100번 읽어보세요. 자연스러워지면 나머지도 빠르게 늘어요.'
+  };
+
+  return { total:total, grade:grade, results:results, emotionCoaching:emotionCoaching, summary:summaries[grade], bonusNote:bonusNote, hasObjHandling: hasAnyObj };
+}
+
+function displayFeedback(result, text) {
+  document.getElementById('fb-result').style.display = 'block';
+  document.getElementById('fb-total-score').textContent = result.total;
+  var gradeBadge = document.getElementById('fb-grade');
+  gradeBadge.textContent = result.grade + '등급';
+  gradeBadge.className = 'grade-badge grade-' + result.grade;
+
+  var stepsEl = document.getElementById('fb-steps');
+  stepsEl.innerHTML = result.results.map(function(r) {
+    var pct = Math.round(r.score / r.maxPt * 100);
+    var color = pct >= 80 ? '#22C55E' : pct >= 60 ? '#3B82F6' : pct >= 40 ? '#F97316' : '#EF4444';
+    return '<div class="step-card">' +
+      '<div class="step-name">' + r.icon + ' ' + r.name + '</div>' +
+      '<div class="step-score" style="color:' + color + '">' + r.score + '<span style="font-size:13px;color:#94a3b8;font-weight:400">/' + r.maxPt + '</span></div>' +
+      '<div class="step-bar-wrap"><div class="step-bar" style="width:' + pct + '%;background:' + color + '"></div></div>' +
+      '<div class="step-feedback">' + r.feedback + '</div>' +
+      '</div>';
+  }).join('');
+
+  if (result.emotionCoaching) {
+    document.getElementById('fb-emotion-coaching').style.display = 'block';
+    document.getElementById('fb-emotion-text').textContent = result.emotionCoaching;
+  } else {
+    document.getElementById('fb-emotion-coaching').style.display = 'none';
+  }
+
+  var summaryEl = document.getElementById('fb-summary');
+  summaryEl.textContent = result.summary;
+  if (result.bonusNote) {
+    var bonusDiv = document.createElement('div');
+    bonusDiv.style.cssText = 'margin-top:10px;padding:8px 12px;background:#F0FDF4;border-radius:7px;font-size:12.5px;color:#065F46;border:1px solid #BBF7D0;';
+    bonusDiv.textContent = result.bonusNote;
+    summaryEl.parentNode.appendChild(bonusDiv);
+  }
+
+  var smsTemplates = getFeedbackSmsTemplates(result.grade, text);
+  var smsList = document.getElementById('fb-sms-list');
+  smsList.innerHTML = smsTemplates.map(function(sms) {
+    var escaped = sms.text.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<div class="sms-box"><div class="sms-text">' + sms.text.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div><button class="sms-copy-btn" onclick="copySmsText(this,\'' + escaped + '\')">복사</button></div>';
+  }).join('');
+
+  document.getElementById('fb-landing-links').innerHTML = getLandingLinks().join('');
+}
+
+function getFeedbackSmsTemplates(grade, text) {
+  var t = text;
+  var isFirstCall = !/재콜|지난번|다시/.test(t);
+  var hasConcern = /비싸|부담|다단계|상의|걱정/.test(t);
+  var templates = [];
+
+  if (isFirstCall) {
+    templates.push({ text: '안녕하세요 OO님 😊\n크루즈닷 담당 매니저 OOO입니다.\n방금 통화 감사드렸어요!\n\n✈️ 크루즈닷 골드 이벤트\n• 골드바 현물 증정\n• 크루즈 무료탑승 포함\n• 담당 매니저 1:1 케어\n\n자세한 내용:\nhttps://joeunlife.my.canva.site/rise2\n\n궁금하신 점 편하게 연락 주세요 🙏' });
+    templates.push({ text: 'OO님, 조금 전 통화했던 크루즈닷이에요 ✈️\n지중해 크루즈 그 꿈, 저도 같이 이뤄드리고 싶어요!\n\n• 항공+크루즈+숙박+식사 ALL 포함\n• A플랜 월 33,000원부터\n• 골드바 현물 증정 이벤트 중\n\n렌탈 상품 함께 보세요:\nhttps://roaring-fox-9f3ba7.netlify.app/' });
+  } else {
+    templates.push({ text: 'OO님 안녕하세요! 크루즈닷 OOO입니다 😊\n\n지난번에 말씀드렸던 크루즈 골드 이벤트,\n이번 달까지만이라서 다시 연락드렸어요.\n\n✅ 골드바 실물 증정\n✅ 크루즈 무료탑승 포함\n✅ 월 33,000원부터\n\n남편분이랑 함께 보시면 어떨까요? 😊\nhttps://joeunlife.my.canva.site/rise2' });
+  }
+
+  if (hasConcern) {
+    templates.push({ text: 'OO님 😊 걱정되셨던 부분 이해해요!\n\n✅ 신한은행 연계 정식 상품\n✅ 14일 이내 청약철회 가능\n✅ 박스 미개봉 시 전액 취소 가능\n✅ 소비자원 등록 업체\n\n안심하시고 한번만 더 이야기해봐요:\nhttps://joeunlife.my.canva.site/rise2' });
+  }
+
+  return templates;
+}
+
+// ═══════════════════════════════════════════════
+// 페르소나 데이터
+// ═══════════════════════════════════════════════
+var TYPE_DATA = {
+  1: {
+    name:'꿈꾸는 여행자형', desc:'크루즈를 오래 가고 싶었던 분', closingRate:'55%',
+    closingDesc:'욕망이 이미 있어요. 구체적인 날짜와 플랜만 제시하면 빠르게 결정해요.',
+    opening:'OO님, 크루즈 가고 싶으셨던 분들이 저희한테 많이 오세요.\n이번에 진짜 가실 수 있는 기회가 생겼어요. 잠깐 들어보실래요?',
+    strategies:['지중해/동남아 구체적인 여행지 장면 생생하게 묘사','골드바 증정 = 예상치 못한 선물로 서프라이즈','담당 매니저가 끝까지 케어한다는 안심감 강조','A플랜 먼저 제시 후 C플랜 앵커링으로 결정 유도'],
+    steps:[
+      { title:'꿈 기억 꺼내기 (2분)', desc:'"예전에 크루즈 가보고 싶다 하신 적 있으세요?" → 과거 꿈 확인, 공감' },
+      { title:'구체적 장면 그리기 (3분)', desc:'지중해 석양, 식사 무제한, 기항지 관광, 담당 매니저 케어 → 생생하게 묘사' },
+      { title:'골드바 선물 공개 (1분)', desc:'"그런데 지금 이벤트로 골드바도 드려요!" → 의외의 혜택으로 감정 극대화' },
+      { title:'플랜 제시 & 결정 (2분)', desc:'A플랜 33,000원 → B/C 앵커링 → "어떤 플랜이 좋으세요?" 직접 질문' },
+      { title:'전자청약 안내 (2분)', desc:'신청 링크 발송 → "14일 안에 취소 가능하니 부담 없이 시작하세요" 안심 멘트' }
+    ],
+    caution:'과도한 설득 필요 없어요. 이미 가고 싶은 분이에요. 상품 스펙 나열보다 "같이 준비해드릴게요" 파트너 느낌으로 접근하세요.',
+    sms:['OO님 안녕하세요! 크루즈닷이에요 ✈️\n\n오래 가고 싶으셨던 크루즈,\n이번에 정말 갈 수 있는 기회예요!\n\n🏅 골드바 현물 증정\n✈️ 지중해/동남아 선택 가능\n💎 담당 매니저 1:1 케어\n\n자세히 보실게요?\nhttps://joeunlife.my.canva.site/rise2']
+  },
+  2: {
+    name:'논리적 분석형', desc:'따져보고 확인해야 결정하는 분', closingRate:'40%',
+    closingDesc:'충분한 정보와 검증 가능한 근거를 제시하면 결정해요. 감정 호소는 역효과예요.',
+    opening:'OO님, 당연히 따져보셔야죠!\n제가 숫자로 정확하게 설명드릴게요.',
+    strategies:['하루 1,100원 ROI 계산 먼저 제시 — 항공+크루즈+숙박+식사 패키지 비교','신한은행 연계 = 공신력 강조','14일 청약철회 + 박스 미개봉 취소 = 리스크 완전 제거','A/B/C 플랜 정확한 월납/총납 표 보여주기'],
+    steps:[
+      { title:'숫자 비교 먼저 (2분)', desc:'"패키지 따로 사면 얼마인지 아세요? 저희는 하루 1,100원이에요." → ROI 비교' },
+      { title:'공신력 증명 (2분)', desc:'신한은행 연계, 소비자원 등록, 모두투어팀 인솔 — 검증 가능한 정보' },
+      { title:'리스크 제거 (1분)', desc:'"14일 청약철회, 박스 미개봉 시 취소 가능. 위험 없어요." — 안전망 강조' },
+      { title:'플랜 비교표 제시 (2분)', desc:'A/B/C 플랜 월납부/총납입 정확한 숫자 — "어떤 플랜이 맞으세요?"' },
+      { title:'결정 직접 요청 (1분)', desc:'"숫자 보시면 아시겠지만 확실히 이득이에요. 오늘 시작하시겠어요?" 직접 질문' }
+    ],
+    caution:'"좋아요", "최고예요" 같은 막연한 표현 금지. 구체적 숫자와 이름만 말하세요. 감정적 호소는 이 고객에게 역효과예요.',
+    sms:['OO님 안녕하세요!\n크루즈닷 골드 회원 상품 안내 문자예요.\n\n📊 A플랜 기준:\n• 월납부: 33,000원 (1~60회)\n• 이후: 15,000원 (61~260회)\n• 총 납입: 4,980,000원\n• 포함: 항공+크루즈+숙박+식사+전문촬영\n\n✅ 신한은행 연계 정식 상품\n✅ 14일 내 청약철회 가능\n\nhttps://joeunlife.my.canva.site/rise2']
+  },
+  3: {
+    name:'즉흥 감정형', desc:'기분에 따라 결정, 흥분하면 빠름', closingRate:'60%',
+    closingDesc:'감정이 올라갔을 때 바로 클로징. 흥분이 식으면 "생각해볼게요"로 돌아가요.',
+    opening:'OO님~ 저도 처음 들었을 때 너무 설레더라고요!\n같이 설레는 이야기 잠깐 해봐요 😊',
+    strategies:['감정 공감 먼저 ("저도 너무 설레요~")','구체적 여행 장면 생생하게 묘사','흥분 피크에서 즉시 "지금 바로 시작하실 수 있어요!" 클로징','긴 설명 금지 — 짧고 임팩트 있게, 3분 안에 결정'],
+    steps:[
+      { title:'감정 공감 (1분)', desc:'"크루즈 가보셨어요? 저도 너무 좋더라고요~" 먼저 감정 연결' },
+      { title:'여행 장면 묘사 (2분)', desc:'지중해 석양, 뷔페, 기항지 쇼핑, 골드바 → 감정 극대화' },
+      { title:'골드바 서프라이즈 (1분)', desc:'"그런데! 골드바도 드려요!" → 흥분 피크 만들기' },
+      { title:'즉시 클로징 (1분)', desc:'"지금 바로 신청하실 수 있어요. A플랜 어때요?" → 망설임 없이 바로' },
+      { title:'전자청약 즉시 발송', desc:'링크 바로 전송, 오래 기다리면 감정 식어버림' }
+    ],
+    caution:'흥분이 식으면 영원히 결정 못해요. 감정 올라갔을 때 3분 안에 결정 받아야 해요. 설명을 너무 길게 하면 안 돼요.',
+    sms:['OO님 🌊 방금 통화 너무 즐거웠어요!\n\n지중해 크루즈 진짜 가실 수 있어요!\n골드바 이벤트 이번 달까지라서 문자드렸어요 💛\n\n지금 바로 확인해보세요!\nhttps://joeunlife.my.canva.site/rise2\n\n카카오로도 연락 주세요 😊']
+  },
+  4: {
+    name:'배우자 의존형', desc:'남편/아내와 상의해야 결정하는 분', closingRate:'45%',
+    closingDesc:'배우자 합류가 핵심이에요. 3자 통화나 정보 문자로 배우자를 설득하세요.',
+    opening:'OO님, 당연히 같이 결정하셔야죠!\n남편분도 함께 들으실 수 있게 제가 도와드릴게요.',
+    strategies:['배우자 거부하지 말고 합류 유도 — "지금 바꿔주세요"','3자 통화 제안 → 배우자에게 직접 설명','배우자에게 보낼 정보 문자 발송 (상세 내용)','2인 여행 프레임 — "두 분이 같이 가시면 더 좋아요"'],
+    steps:[
+      { title:'배우자 공감 (1분)', desc:'"당연히 같이 결정하셔야죠. 현명하세요~" → 배우자 존중 표현' },
+      { title:'3자 통화 제안 (1분)', desc:'"지금 남편분 계시면 바꿔주실 수 있어요?" → 직접 합류 시도' },
+      { title:'정보 문자 발송 (1분)', desc:'"남편분이 보실 수 있게 자세한 내용 문자 드릴게요" → 설득 자료 제공' },
+      { title:'다음 통화 약속 (1분)', desc:'"내일 남편분과 함께 5분만 통화 가능하세요? 오전/오후?" → 명확한 약속' },
+      { title:'재콜 실행', desc:'약속한 시간에 정확히, 배우자에게 직접 설명' }
+    ],
+    caution:'"남편이 결정하시면 되세요" 절대 금지. 항상 부인이 먼저 원해야 남편도 동의해요. 부인의 욕망을 먼저 키우세요.',
+    sms:['OO님 안녕하세요! 크루즈닷이에요 😊\n\n남편분이랑 같이 보시라고 정보 문자 드려요!\n\n✈️ 크루즈닷 골드 회원 상품\n• 2인 크루즈 여행 플랜\n• 골드바 현물 증정\n• A플랜 월 33,000원부터\n• 담당 매니저 1:1 케어\n\n👨‍👩‍ 두 분이 함께 보세요:\nhttps://joeunlife.my.canva.site/rise2\n\n내일 남편분이랑 같이 통화 가능하실까요? 😊']
+  },
+  5: {
+    name:'의심 방어형', desc:'다단계? 사기? 의심부터 하는 분', closingRate:'30%',
+    closingDesc:'의심을 정면 돌파. 구체적 증거 3가지로 신뢰 쌓은 후에만 여행 이야기 시작해요.',
+    opening:'OO님, 의심되시는 거 당연해요!\n저도 처음엔 그럴 것 같아요. 잠깐 설명드려도 될까요?',
+    strategies:['의심 공감 먼저 → 방어적 반응 절대 금지 ("당연히 그런 생각 드실 수 있죠~")','신한은행 연계 = 공신력 1번','14일 청약철회 + 박스 미개봉 취소 = 안전망','소비자원 등록 언급 — "직접 확인해보셔도 돼요"'],
+    steps:[
+      { title:'의심 공감 (1분)', desc:'"당연히 그런 생각 드실 수 있죠. 저라도 그럴 것 같아요~" → 공감 먼저' },
+      { title:'신한은행 증거 (1분)', desc:'"저희는 신한은행이랑 함께하는 정식 회사예요. 검색해보셔도 돼요."' },
+      { title:'취소 안전망 설명 (1분)', desc:'"14일 안에 박스 안 뜯으시면 취소 되세요. 위험 없어요." → 리스크 완전 제거' },
+      { title:'감정으로 전환 (2분)', desc:'신뢰 쌓인 후 → 크루즈 여행 꿈 이야기로 자연스럽게 전환' },
+      { title:'클로징 시도 (1분)', desc:'의심이 풀린 지금이 골든타임 — 플랜 제시' }
+    ],
+    caution:'"다단계 아니에요!"라고 강하게 부정하면 더 의심해요. "당연히 확인하셔야죠~" 하고 여유 있게 공감하면서 시작하세요.',
+    sms:['OO님 안녕하세요! 크루즈닷이에요.\n\n걱정되셨던 부분 이해해요 😊\n확인해보실 수 있는 정보예요:\n\n✅ 신한은행 연계 정식 상품\n✅ 14일 내 청약철회 가능\n✅ 박스 미개봉 시 전액 취소 가능\n✅ 한국관광공사 등록 여행사\n\n안심하시고 한번 더 이야기해봐요:\nhttps://joeunlife.my.canva.site/rise2']
+  },
+  6: {
+    name:'바쁨 회피형', desc:'바빠요/나중에요로 피하는 분', closingRate:'25%',
+    closingDesc:'짧게 핵심만. 2분 약속 잡고, 문자로 정보 보내고, 재콜하는 게 전략이에요.',
+    opening:'OO님, 바쁘신 거 알아요! 딱 2분만요!\n2분 후에 끊을게요 약속해요 😊',
+    strategies:['시간 약속 먼저 ("딱 2분이에요!")','핵심 혜택 딱 1가지만 — 골드바 증정 임팩트','문자로 정보 보내고 비동기 소통','다음 통화 약속 명확히 잡기 — "이번 주 언제 편하세요?"'],
+    steps:[
+      { title:'시간 약속 (30초)', desc:'"딱 2분이에요. 2분 후에 바로 끊을게요 약속해요!"' },
+      { title:'핵심 1가지만 (1분)', desc:'골드바 증정 하나만 임팩트 있게 → "골드바 드려요!"' },
+      { title:'문자 발송 동의 (30초)', desc:'"문자로 자세한 내용 보내드려도 될까요?"' },
+      { title:'다음 통화 약속 (30초)', desc:'"이번 주 중에 5분만 다시 통화 가능하세요? 오전/오후 중에?" → 확실한 약속' },
+      { title:'재콜 실행', desc:'약속한 시간에 정확히, 이미 문자로 정보 본 상태에서 시작' }
+    ],
+    caution:'길게 설명하면 끊어버려요. 짧고 강하게 핵심 1가지만. 억지로 붙잡으면 영원히 거부해요.',
+    sms:['OO님 바쁘신데 감사해요! 크루즈닷이에요 😊\n\n딱 한 가지만요:\n👉 지금 골드바 증정 이벤트 중이에요!\n\n나중에 편하실 때 잠깐 보세요:\nhttps://joeunlife.my.canva.site/rise2\n\n언제든 연락 주세요 🙏']
+  },
+  7: {
+    name:'감정 죄책감형', desc:'자신에게 돈 쓰기 미안한 분', closingRate:'50%',
+    closingDesc:'자기 자신이 아닌 가족을 위한 선물로 프레임 전환하면 결정 빨라요.',
+    opening:'OO님, 이건 본인만을 위한 게 아니에요.\n가족 전부를 위한 선물이에요 😊',
+    strategies:['자기 자신 → 가족 선물 프레임으로 전환','부모님/자녀와 함께하는 크루즈 이미지 강조','전문 촬영 파일 = 평생 추억으로 남는 것 강조','추억 = 돈으로 살 수 없는 것'],
+    steps:[
+      { title:'죄책감 공감 (1분)', desc:'"자신한테 돈 쓰기 미안하시죠? 저도 그런 마음 알아요." → 공감' },
+      { title:'가족 프레임 전환 (2분)', desc:'"이건 가족한테 드리는 선물이에요. 부모님/남편/자녀와 함께." → 명분 제공' },
+      { title:'전문 촬영 카드 (1분)', desc:'"사진·영상 파일도 드려요. 이 사진이 평생 추억이에요." → 감정 극대화' },
+      { title:'감정 클로징 (1분)', desc:'"OO님이 결정하시면 가족 모두 행복해져요." → 감정 피크에서 결정 유도' },
+      { title:'플랜 제시', desc:'감정이 올라간 순간 플랜 결정 유도' }
+    ],
+    caution:'"본인을 위해 쓰세요"는 역효과예요. 항상 가족과 연결 지어야 해요.',
+    sms:['OO님 안녕하세요! 크루즈닷이에요 😊\n\n이건 OO님만을 위한 게 아니에요.\n가족 모두를 위한 선물이에요 🎁\n\n✈️ 2인 크루즈 여행\n📸 전문 사진·영상 파일 제공\n💛 평생 남는 추억\n🏅 골드바 현물 증정\n\n가족과 함께 보세요:\nhttps://joeunlife.my.canva.site/rise2']
+  },
+  8: {
+    name:'재콜 미결형', desc:'이전에 "생각해볼게요"로 끝난 분', closingRate:'40%',
+    closingDesc:'새로운 카드 1장 투입이 핵심이에요. 같은 방법으로 재콜하면 같은 결과예요.',
+    opening:'OO님, 저번에 생각해보신다고 하셨는데,\n어떤 부분이 마음에 걸리셨어요? 솔직하게 말씀해주세요.',
+    strategies:['이전 거부 이유 먼저 파악 → 같은 접근 절대 금지','새 카드 1장 투입: 담당 매니저 실명 공개 (가장 강함)','2순위: 전문 촬영 사진·영상 파일 카카오 전송 (시각 증거)','3순위: 배우자 합류 3자 통화 제안'],
+    steps:[
+      { title:'저항 이유 파악 (1분)', desc:'"어떤 부분이 걸리셨어요?" → 이전 거부 이유 정확히 확인' },
+      { title:'새 카드 투입 (2분)', desc:'담당 매니저 실명 공개 또는 전문촬영 파일 → 미투입 카드 선택해서 투입' },
+      { title:'감정 재점화 (1분)', desc:'이전 통화에서 욕망 있었다면 다시 꺼내기 — "그때 지중해 가고 싶다 하셨잖아요"' },
+      { title:'배우자 합류 제안 (1분)', desc:'"남편분이랑 내일 같이 통화 가능하세요?"' },
+      { title:'결정 or 재약속', desc:'4회 이상 재콜 후에도 결정 없으면 → 6개월 후 재콜로 전환' }
+    ],
+    caution:'새 카드 없이 재콜 금지. 4회 이상 재콜 후에도 결정 없으면 6개월 후 재콜로 전환하세요.',
+    sms:['OO님 안녕하세요! 크루즈닷 OOO입니다 😊\n\n지난번에 생각해보신다고 하셨는데,\n한 가지 더 말씀드리고 싶어서 연락드렸어요.\n\n🎯 저는 담당 매니저 OOO이에요.\n선생님 가입하시면 제가 직접 담당이 돼요.\n출발 전에 먼저 연락드리고,\n여행 중에도 저한테 연락되고,\n귀국 후 사진·영상 파일까지 드려요.\n\n이런 여행사 없어요!\n\n내일 잠깐 통화 가능하실까요? 🙏\nhttps://joeunlife.my.canva.site/rise2']
+  }
+};
+
+function analyzePersona() {
+  var age = document.getElementById('p-age').value;
+  var gender = document.getElementById('p-gender').value;
+  var job = document.getElementById('p-job').value;
+  var money = document.getElementById('p-money').value;
+  var reaction = document.getElementById('p-reaction').value;
+  var travel = document.getElementById('p-travel').value;
+
+  // TYPE 결정 로직
+  var typeNum = 1;
+  if (reaction === '의심') typeNum = 5;
+  else if (reaction === '배우자') typeNum = 4;
+  else if (reaction === '바쁨') typeNum = 6;
+  else if (reaction === '재콜') typeNum = 8;
+  else if (travel === '꿈') typeNum = 1;
+  else if ((job === '주부' || job === '은퇴') && money === '빠듯함') typeNum = 7;
+  else if (money === '여유있음' && (reaction === '궁금' || reaction === '모름')) typeNum = 3;
+  else if (reaction === '비쌈') typeNum = 2;
+  else if (travel === '고가') typeNum = 2;
+  else typeNum = 1;
+
+  var d = TYPE_DATA[typeNum];
+  if (!d) return;
+
+  document.getElementById('persona-result').style.display = 'block';
+  document.getElementById('p-type-num').textContent = typeNum;
+  document.getElementById('p-type-name').textContent = d.name;
+  document.getElementById('p-type-desc').textContent = d.desc;
+  document.getElementById('p-closing-rate').textContent = d.closingRate;
+  document.getElementById('p-closing-desc').textContent = d.closingDesc;
+  document.getElementById('p-opening').textContent = d.opening;
+  document.getElementById('p-caution').textContent = '⚠️ 주의: ' + d.caution;
+
+  var stepsEl = document.getElementById('p-step-guide');
+  stepsEl.innerHTML = d.steps.map(function(s, i) {
+    return '<div class="step-item"><div class="step-num">' + (i+1) + '</div><div class="step-content"><h5>' + s.title + '</h5><p>' + s.desc + '</p></div></div>';
+  }).join('');
+
+  var stratEl = document.getElementById('p-strategies');
+  stratEl.innerHTML = d.strategies.map(function(s) { return '<li>' + s + '</li>'; }).join('');
+
+  var smsEl = document.getElementById('p-sms-list');
+  smsEl.innerHTML = d.sms.map(function(s) {
+    var escaped = s.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+    return '<div class="sms-box"><div class="sms-text">' + s.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</div><button class="sms-copy-btn" onclick="copySmsText(this,\'' + escaped + '\')">복사</button></div>';
+  }).join('');
+
+  document.getElementById('p-landing-links').innerHTML = getLandingLinks().join('');
+  document.getElementById('persona-result').scrollIntoView({ behavior:'smooth' });
+}
+
+// ═══════════════════════════════════════════════
+// 공통 유틸
+// ═══════════════════════════════════════════════
+function getLandingLinks() {
+  return [
+    '<a class="landing-chip chip-gold" href="https://joeunlife.my.canva.site/rise2" target="_blank">🏆 골드 이벤트 페이지</a>',
+    '<a class="landing-chip chip-rental" href="https://roaring-fox-9f3ba7.netlify.app/" target="_blank">🎁 렌탈 상품 페이지</a>',
+    '<a class="landing-chip chip-cruise" href="https://leadgeny.kr/i/AbP" target="_blank">📋 신청 랜딩페이지</a>',
+    '<a class="landing-chip chip-kakao" href="https://open.kakao.com/o/plREDDUh" target="_blank">💬 카카오 오픈채팅</a>'
+  ];
+}
+
+function copySmsText(btn, text) {
+  var decoded = text.replace(/\\n/g, '\n').replace(/\\'/g, "'");
+  navigator.clipboard.writeText(decoded).catch(function() {
+    var t = document.createElement('textarea');
+    t.value = decoded; document.body.appendChild(t); t.select();
+    document.execCommand('copy'); document.body.removeChild(t);
+  });
+  var orig = btn.textContent;
+  btn.textContent = '복사됨!'; btn.style.background = '#059669';
+  setTimeout(function() { btn.textContent = orig; btn.style.background = '#10B981'; }, 1500);
+}
+</script>
+
+
+</body>
+</html>
