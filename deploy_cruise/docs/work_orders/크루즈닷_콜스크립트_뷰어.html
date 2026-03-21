@@ -2033,13 +2033,7 @@ const BLOCK_PW = '0313';
 let _editTarget = null; // 현재 수정 중인 block-wrap element
 
 function initBlockControls() {
-  // 1) 이름 localStorage 복원
-  const savedName = localStorage.getItem('sb_username');
-  if (savedName) {
-    const el = document.getElementById('block-modal-author');
-    if (el) el.value = savedName;
-  }
-  // 2) 모달 삽입
+  // 1) 모달 삽입
   if (!document.getElementById('block-modal')) {
     document.body.insertAdjacentHTML('beforeend', `
 <div id="block-modal">
@@ -2055,6 +2049,12 @@ function initBlockControls() {
     </div>
   </div>
 </div>`);
+  }
+  // 모달 삽입 후 이름 복원 (타이밍 버그 수정)
+  const savedName = localStorage.getItem('sb_username');
+  if (savedName) {
+    const el = document.getElementById('block-modal-author');
+    if (el) el.value = savedName;
   }
 
   // 2) 모든 script-card / principle-box / wait-card에 컨트롤 추가
@@ -2116,7 +2116,11 @@ function editBlock(btn) {
   const labelEl = card.querySelector('.script-card-label,.rp-title');
   const textEl  = card.querySelector('.script-text,.type-rule');
   const noteEl  = card.querySelector('.script-note');
-  document.getElementById('block-modal-label').value   = labelEl ? labelEl.textContent.trim() : '';
+  // 배지(.block-modifier) 텍스트 제외하고 label 순수 텍스트만 추출
+  const _labelText = labelEl ? Array.from(labelEl.childNodes)
+    .filter(n => !n.classList?.contains('block-modifier'))
+    .map(n => n.textContent).join('').trim() : '';
+  document.getElementById('block-modal-label').value = _labelText;
   document.getElementById('block-modal-content').value = textEl  ? textEl.textContent.trim()  : card.innerText.trim();
   document.getElementById('block-modal-note').value    = noteEl  ? noteEl.textContent.trim()  : '';
   document.getElementById('block-modal').classList.add('open');
@@ -2222,6 +2226,8 @@ function addSaveBlock(phase) {
   const addBtn = phase.querySelector('.add-block-btn');
   phase.insertBefore(wrap, addBtn);
   _applyModifier(wrap, author);
+  // 새 블록에 card-id 부여 (Supabase 동기화 대상 등록)
+  if (typeof assignCardIds === 'function') assignCardIds();
   // 저장 버튼 복원
   const saveBtn = document.querySelector('.modal-btn-save');
   saveBtn.textContent = '저장';
@@ -2327,10 +2333,11 @@ function applyOverride(row) {
     const lbl = card.querySelector('.script-card-label');
     const txt = card.querySelector('.script-text');
     const nt  = card.querySelector('.script-note');
-    if (lbl && row.label)   { /* label은 modifier badge 포함되므로 textContent 대신 firstChild만 교체 */
-      const firstText = lbl.childNodes[0];
-      if (firstText && firstText.nodeType === Node.TEXT_NODE) firstText.nodeValue = row.label;
-      else if (!lbl.querySelector('.block-modifier')) lbl.textContent = row.label;
+    if (lbl && row.label) {
+      // 배지(.block-modifier)는 보존하고 텍스트 노드만 교체
+      const badges = Array.from(lbl.querySelectorAll('.block-modifier'));
+      lbl.textContent = row.label; // 모든 자식 제거
+      badges.forEach(b => lbl.appendChild(b)); // 배지 복원
     }
     if (txt && row.content)  txt.textContent = row.content;
     if (row.note) {
@@ -2355,10 +2362,11 @@ async function loadOverrides() {
   setSyncDot('online');
 }
 
-// ─ Realtime 구독 ─
+// ─ Realtime 구독 (중복 구독 방지) ─
+let _realtimeCh = null;
 function setupRealtime() {
-  if (!sbClient) return;
-  sbClient.channel('script_overrides_rt')
+  if (!sbClient || _realtimeCh) return; // 이미 구독 중이면 재호출 방지
+  _realtimeCh = sbClient.channel('script_overrides_rt')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'script_overrides' }, payload => {
       if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
         applyOverride(payload.new);
@@ -2367,6 +2375,10 @@ function setupRealtime() {
     })
     .subscribe(status => {
       if (status === 'SUBSCRIBED') setSyncDot('online');
+      else if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+        _realtimeCh = null; // 재연결 허용
+        setSyncDot('');
+      }
     });
 }
 
