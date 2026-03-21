@@ -6,6 +6,7 @@
 <title>크루즈닷 상담 링크 도구</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root {
   --bg:#F8F9FA; --card:#FFFFFF; --primary:#2563EB; --navy:#1E3A5F;
@@ -1670,6 +1671,14 @@ function analyzePersona() {
 
   document.getElementById('p-landing-links').innerHTML = getLandingLinks().join('');
   document.getElementById('persona-result').scrollIntoView({ behavior:'smooth' });
+
+  // Supabase 저장
+  savePersonaLog({
+    age: age, gender: gender, job: job, money: money,
+    reaction: reaction, travel: travel,
+    note: document.getElementById('p-note').value.trim(),
+    type_num: typeNum, type_name: d.name
+  });
 }
 
 // ═══════════════════════════════════════════════
@@ -1694,6 +1703,66 @@ function copySmsText(btn, text) {
   var orig = btn.textContent;
   btn.textContent = '복사됨!'; btn.style.background = '#059669';
   setTimeout(function() { btn.textContent = orig; btn.style.background = '#10B981'; }, 1500);
+}
+
+// ═══════════════════════════════════════════════
+// Supabase 페르소나 로그 저장
+// ═══════════════════════════════════════════════
+var _sbPersona = null;
+(function() {
+  if (typeof window.supabase !== 'undefined') {
+    _sbPersona = window.supabase.createClient(
+      'https://cnynywuxapxvythbcagz.supabase.co',
+      'sb_publishable_YLwvLzCOVMiv66xd1iH-ww_BTr2R6F6'
+    );
+  }
+})();
+
+async function savePersonaLog(data) {
+  if (!_sbPersona) return;
+  var analyst = localStorage.getItem('sb_username') || '';
+  var row = {
+    age:         data.age       || '',
+    gender:      data.gender    || '',
+    job:         data.job       || '',
+    money:       data.money     || '',
+    reaction:    data.reaction  || '',
+    travel:      data.travel    || '',
+    note:        data.note      || '',
+    type_num:    data.type_num  || 0,
+    type_name:   data.type_name || '',
+    analyzed_by: analyst,
+    analyzed_at: new Date().toISOString()
+  };
+  var res = await _sbPersona.from('persona_logs').insert(row);
+  if (res.error) {
+    console.warn('[Supabase] persona save error', res.error);
+  } else {
+    showPersonaToast('백데이터 저장 완료 (' + (analyst || '익명') + ')');
+  }
+}
+
+function showPersonaToast(msg) {
+  var t = document.getElementById('persona-save-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'persona-save-toast';
+    Object.assign(t.style, {
+      position:'fixed', bottom:'24px', right:'24px', zIndex:'9999',
+      background:'#1E3A5F', color:'#fff', padding:'10px 18px',
+      borderRadius:'24px', fontSize:'13px', fontWeight:'600',
+      boxShadow:'0 4px 16px rgba(0,0,0,.25)',
+      opacity:'0', transform:'translateY(8px)', transition:'.3s',
+      pointerEvents:'none'
+    });
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1'; t.style.transform = 'translateY(0)';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function() {
+    t.style.opacity = '0'; t.style.transform = 'translateY(8px)';
+  }, 3500);
 }
 </script>
 
