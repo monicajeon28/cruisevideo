@@ -6,6 +6,7 @@
 <title>크루즈닷 골드 회원 콜스크립트 뷰어 v19</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -202,6 +203,12 @@ a{color:var(--primary);text-decoration:none}
 @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 .block-modifier{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#64748B;background:#EFF6FF;border-radius:6px;padding:2px 7px;margin-left:4px;flex-shrink:0;white-space:nowrap}
 .block-modifier .mod-name{font-weight:700;color:#2563EB}
+/* ─── SUPABASE SYNC UI ─── */
+#sync-toast{position:fixed;bottom:24px;right:24px;background:#1E3A5F;color:#fff;padding:10px 18px;border-radius:24px;font-size:13px;font-weight:600;box-shadow:0 4px 16px rgba(0,0,0,.25);z-index:9999;opacity:0;transform:translateY(8px);transition:.3s;pointer-events:none;max-width:320px}
+#sync-toast.show{opacity:1;transform:translateY(0)}
+#sync-dot{width:8px;height:8px;border-radius:50%;background:#94A3B8;display:inline-block;margin-right:5px;transition:.4s;flex-shrink:0}
+#sync-dot.online{background:#22C55E;box-shadow:0 0 0 2px rgba(34,197,94,.3)}
+#sync-dot.syncing{background:#F59E0B;animation:pulse-dot .8s infinite}
 .block-modifier .mod-time{color:#94A3B8;margin-left:2px}
 .modal-row{display:flex;gap:8px;margin-top:14px}
 .modal-btn{flex:1;padding:9px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
@@ -249,6 +256,7 @@ a{color:var(--primary);text-decoration:none}
     <button class="btn-sm" onclick="showAll()">전체보기</button>
     <button class="btn-sm" onclick="window.print()">🖨 인쇄</button>
     <a class="btn-sm" href="https://roaring-fox-9f3ba7.netlify.app/" target="_blank" style="text-decoration:none">🌐 랜딩페이지</a>
+    <button class="btn-sm" id="sync-btn" style="display:flex;align-items:center;gap:5px;cursor:default" title="Supabase 실시간 동기화"><span id="sync-dot"></span>동기화</button>
   </div>
 </div>
 <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
@@ -2137,6 +2145,13 @@ function saveBlock() {
     else card.innerHTML = `<b>${newLabel}</b><br>${newContent}`;
   }
   _applyModifier(_editTarget, author);
+  // Supabase 동기화
+  const _cardId = _editTarget.dataset.cardId;
+  const _phaseEl = _editTarget.closest('[id^="phase-"],[id^="type-detail-"]');
+  saveOverrideToSupabase(_cardId, {
+    phase: _phaseEl ? _phaseEl.id : '',
+    label: newLabel, content: newContent, note: newNote, author
+  });
   closeBlockModal();
 }
 
@@ -2245,6 +2260,119 @@ function injectPhaseEssence() {
   });
 }
 
+// ─── SUPABASE 실시간 동기화 ─────────────────────────
+const SB_URL = 'https://cnynywuxapxvythbcagz.supabase.co';
+const SB_KEY = 'sb_publishable_YLwvLzCOVMiv66xd1iH-ww_BTr2R6F6';
+let sbClient = null;
+
+function setSyncDot(state) {
+  const dot = document.getElementById('sync-dot');
+  if (!dot) return;
+  dot.className = '';
+  if (state === 'online')   dot.classList.add('online');
+  if (state === 'syncing')  dot.classList.add('syncing');
+}
+
+function showSyncToast(msg) {
+  let t = document.getElementById('sync-toast');
+  if (!t) { t = document.createElement('div'); t.id = 'sync-toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ─ 모든 block-wrap 에 data-card-id 부여 ─
+function assignCardIds() {
+  document.querySelectorAll('.phase-section, .type-detail-section').forEach(section => {
+    section.querySelectorAll('.block-wrap').forEach((wrap, i) => {
+      if (!wrap.dataset.cardId) wrap.dataset.cardId = `${section.id}_${i}`;
+    });
+  });
+}
+
+// ─ Supabase 저장 ─
+async function saveOverrideToSupabase(cardId, data) {
+  if (!sbClient || !cardId) return;
+  setSyncDot('syncing');
+  const { error } = await sbClient.from('script_overrides').upsert({
+    card_id: cardId,
+    phase: data.phase || '',
+    label: data.label || '',
+    content: data.content || '',
+    note: data.note || '',
+    updated_by: data.author || '',
+    updated_at: new Date().toISOString()
+  }, { onConflict: 'card_id' });
+  setSyncDot('online');
+  if (error) { console.warn('[Supabase] save error', error); showSyncToast('⚠️ 저장 실패 — ' + error.message); }
+  else showSyncToast(`✅ ${data.author}님 수정 — 팀원에게 동기화됨`);
+}
+
+// ─ override row → DOM 적용 ─
+function applyOverride(row) {
+  const wrap = document.querySelector(`[data-card-id="${row.card_id}"]`);
+  if (!wrap) return;
+  const card = wrap.querySelector('.script-card,.principle-box,.wait-card');
+  if (!card) return;
+  if (card.classList.contains('script-card')) {
+    const lbl = card.querySelector('.script-card-label');
+    const txt = card.querySelector('.script-text');
+    const nt  = card.querySelector('.script-note');
+    if (lbl && row.label)   { /* label은 modifier badge 포함되므로 textContent 대신 firstChild만 교체 */
+      const firstText = lbl.childNodes[0];
+      if (firstText && firstText.nodeType === Node.TEXT_NODE) firstText.nodeValue = row.label;
+      else if (!lbl.querySelector('.block-modifier')) lbl.textContent = row.label;
+    }
+    if (txt && row.content)  txt.textContent = row.content;
+    if (row.note) {
+      if (nt) nt.textContent = row.note;
+      else card.insertAdjacentHTML('beforeend', `<div class="script-note">${row.note}</div>`);
+    }
+  } else {
+    if (row.content) card.innerHTML = row.label ? `<b>${row.label}</b><br>${row.content}` : row.content;
+  }
+  if (row.updated_by) _applyModifier(wrap, row.updated_by);
+}
+
+// ─ 전체 override 로드 ─
+async function loadOverrides() {
+  if (!sbClient) return;
+  const { data, error } = await sbClient.from('script_overrides').select('*');
+  if (error) { console.warn('[Supabase] load error', error); return; }
+  if (data && data.length) {
+    data.forEach(row => applyOverride(row));
+    showSyncToast(`🔄 ${data.length}개 수정사항 로드 완료`);
+  }
+  setSyncDot('online');
+}
+
+// ─ Realtime 구독 ─
+function setupRealtime() {
+  if (!sbClient) return;
+  sbClient.channel('script_overrides_rt')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'script_overrides' }, payload => {
+      if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+        applyOverride(payload.new);
+        showSyncToast(`✏️ ${payload.new.updated_by || '팀원'}이 수정 — 화면 업데이트`);
+      }
+    })
+    .subscribe(status => {
+      if (status === 'SUBSCRIBED') setSyncDot('online');
+    });
+}
+
+// ─ 초기화 ─
+function initSupabase() {
+  if (typeof window.supabase === 'undefined') {
+    console.warn('[Supabase] CDN 미로드'); return;
+  }
+  sbClient = window.supabase.createClient(SB_URL, SB_KEY);
+  assignCardIds();
+  loadOverrides();
+  setupRealtime();
+}
+
 // ─── INIT ─────────────────────────────────────────
 buildNav();
 buildTypeFilter();
@@ -2255,6 +2383,8 @@ initBlockControls();
 document.getElementById('block-modal').addEventListener('click', e => {
   if (e.target.id === 'block-modal') closeBlockModal();
 });
+// Supabase 초기화
+initSupabase();
 </script>
 </body>
 </html>
