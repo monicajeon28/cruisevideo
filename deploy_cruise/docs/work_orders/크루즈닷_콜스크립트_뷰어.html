@@ -144,6 +144,9 @@ a{color:var(--primary);text-decoration:none}
 .link-chip.secondary:hover{background:#EFF6FF}
 .link-chip.orange{background:#EA580C;color:#fff}
 .link-chip.orange:hover{background:#C2410C}
+.kakao-copy-btn{background:#FEE500;color:#191919;border:none;font-family:inherit;font-weight:700}
+.kakao-copy-btn:hover{background:#F5D800;color:#191919}
+.kakao-copy-btn.copied{background:#22C55E;color:#fff}
 .chip-info{display:inline-flex;align-items:center;gap:5px;padding:5px 10px;background:#F1F5F9;color:#475569;border-radius:12px;font-size:11.5px;margin:3px}
 /* ─── COMPARE TABLE ─── */
 .compare-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.5px}
@@ -1085,7 +1088,7 @@ mysangjo.or.kr 에서도 확인 가능해요."</div>
   <div style="margin-top:10px">
     <a class="link-chip orange" href="http://leadz.kr/vvo" target="_blank">📋 가입 신청 링크</a>
     <a class="link-chip secondary" href="https://cafe.naver.com/funhanshop2/33720" target="_blank">가입절차 안내</a>
-    <a class="link-chip secondary" href="https://open.kakao.com/o/plREDDUh" target="_blank">카카오 오픈채팅</a>
+    <button class="link-chip kakao-copy-btn" onclick="copyKakaoLink(this)" title="클릭하면 링크 복사">💛 카카오 링크 복사</button>
   </div>
 </section>
 
@@ -2396,6 +2399,22 @@ function initSupabase() {
   assignCardIds();
   loadOverrides();
   setupRealtime();
+}
+
+// ─── 카카오 링크 복사 ──────────────────────────────
+const KAKAO_LINK = 'https://open.kakao.com/o/plREDDUh';
+function copyKakaoLink(btn) {
+  navigator.clipboard.writeText(KAKAO_LINK).catch(() => {
+    const t = document.createElement('textarea');
+    t.value = KAKAO_LINK; document.body.appendChild(t); t.select();
+    document.execCommand('copy'); document.body.removeChild(t);
+  });
+  btn.textContent = '복사됨!';
+  btn.classList.add('copied');
+  setTimeout(() => {
+    btn.textContent = '💛 카카오 링크 복사';
+    btn.classList.remove('copied');
+  }, 2000);
 }
 
 // ─── INIT ─────────────────────────────────────────
