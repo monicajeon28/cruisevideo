@@ -1737,6 +1737,7 @@ async function savePersonaLog(data) {
   var res = await _sbPersona.from('persona_logs').insert(row);
   if (res.error) {
     console.warn('[Supabase] persona save error', res.error);
+    showPersonaToast('저장 실패: ' + (res.error.message || '연결 오류'));
   } else {
     showPersonaToast('백데이터 저장 완료 (' + (analyst || '익명') + ')');
   }
