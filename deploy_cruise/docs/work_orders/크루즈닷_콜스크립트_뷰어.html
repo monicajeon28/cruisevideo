@@ -2033,7 +2033,13 @@ const BLOCK_PW = '0313';
 let _editTarget = null; // 현재 수정 중인 block-wrap element
 
 function initBlockControls() {
-  // 1) 모달 삽입
+  // 1) 이름 localStorage 복원
+  const savedName = localStorage.getItem('sb_username');
+  if (savedName) {
+    const el = document.getElementById('block-modal-author');
+    if (el) el.value = savedName;
+  }
+  // 2) 모달 삽입
   if (!document.getElementById('block-modal')) {
     document.body.insertAdjacentHTML('beforeend', `
 <div id="block-modal">
@@ -2144,6 +2150,8 @@ function saveBlock() {
     if (!newLabel) card.innerHTML = newContent;
     else card.innerHTML = `<b>${newLabel}</b><br>${newContent}`;
   }
+  // 이름 localStorage 저장 (다음 수정 시 자동 채워짐)
+  localStorage.setItem('sb_username', author);
   _applyModifier(_editTarget, author);
   // Supabase 동기화
   const _cardId = _editTarget.dataset.cardId;
@@ -2157,7 +2165,7 @@ function saveBlock() {
 
 function closeBlockModal() {
   document.getElementById('block-modal').classList.remove('open');
-  document.getElementById('block-modal-author').value = '';
+  // 이름 유지 — localStorage에서 다음 모달 오픈 시 자동 복원
   _editTarget = null;
 }
 
